@@ -1,0 +1,3 @@
+[submodule "3rdparty/md4qt"]
+	path = 3rdparty/md4qt
+	url = https://github.com/igormironchik/md4qt.git
