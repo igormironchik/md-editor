@@ -20,30 +20,38 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// Qt include.
-#include <QString>
-#include <QApplication>
-
 // md-editor include.
-#include "mainwindow.hpp"
+#include "editor.hpp"
 
 
-int main( int argc, char ** argv )
+namespace MdEditor {
+
+//
+// EditorPrivate
+//
+
+struct EditorPrivate {
+	EditorPrivate( Editor * parent )
+		:	q( parent )
+	{
+	}
+
+	Editor * q;
+}; // struct EditorPrivate
+
+
+//
+// Editor
+//
+
+Editor::Editor( QWidget * parent )
+	:	QPlainTextEdit( parent )
+	,	d( new EditorPrivate( this ) )
 {
-	QApplication app( argc, argv );
-
-	QIcon appIcon( QStringLiteral( ":/img/icon_256x256.png" ) );
-	appIcon.addFile( QStringLiteral( ":/img/icon_128x128.png" ) );
-	appIcon.addFile( QStringLiteral( ":/img/icon_64x64.png" ) );
-	appIcon.addFile( QStringLiteral( ":/img/icon_48x48.png" ) );
-	appIcon.addFile( QStringLiteral( ":/img/icon_32x32.png" ) );
-	appIcon.addFile( QStringLiteral( ":/img/icon_24x24.png" ) );
-	appIcon.addFile( QStringLiteral( ":/img/icon_16x16.png" ) );
-	app.setWindowIcon( appIcon );
-
-	MdEditor::MainWindow w;
-	w.resize( 800, 600 );
-	w.show();
-
-	return QApplication::exec();
 }
+
+Editor::~Editor()
+{
+}
+
+} /* namespace MdEditor */

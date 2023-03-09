@@ -20,30 +20,35 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#pragma once
+
 // Qt include.
-#include <QString>
-#include <QApplication>
-
-// md-editor include.
-#include "mainwindow.hpp"
+#include <QPlainTextEdit>
+#include <QScopedPointer>
 
 
-int main( int argc, char ** argv )
+namespace MdEditor {
+
+//
+// Editor
+//
+
+struct EditorPrivate;
+
+//! Markdown text editor.
+class Editor
+	:	public QPlainTextEdit
 {
-	QApplication app( argc, argv );
+	Q_OBJECT
 
-	QIcon appIcon( QStringLiteral( ":/img/icon_256x256.png" ) );
-	appIcon.addFile( QStringLiteral( ":/img/icon_128x128.png" ) );
-	appIcon.addFile( QStringLiteral( ":/img/icon_64x64.png" ) );
-	appIcon.addFile( QStringLiteral( ":/img/icon_48x48.png" ) );
-	appIcon.addFile( QStringLiteral( ":/img/icon_32x32.png" ) );
-	appIcon.addFile( QStringLiteral( ":/img/icon_24x24.png" ) );
-	appIcon.addFile( QStringLiteral( ":/img/icon_16x16.png" ) );
-	app.setWindowIcon( appIcon );
+public:
+	explicit Editor( QWidget * parent );
+	~Editor() override;
 
-	MdEditor::MainWindow w;
-	w.resize( 800, 600 );
-	w.show();
+private:
+	Q_DISABLE_COPY( Editor )
 
-	return QApplication::exec();
-}
+	QScopedPointer< EditorPrivate > d;
+}; // class Editor
+
+} /* namespace MdEditor */
