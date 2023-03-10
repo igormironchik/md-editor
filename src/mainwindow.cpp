@@ -39,6 +39,8 @@
 #include <QMenu>
 #include <QAction>
 #include <QMenuBar>
+#include <QFileInfo>
+#include <QDir>
 
 // md4qt include.
 #define MD4QT_QT_SUPPORT
@@ -84,7 +86,7 @@ struct MainWindowPrivate {
 		channel->registerObject( QStringLiteral( "content" ), html );
 		page->setWebChannel( channel );
 
-		preview->setUrl( QUrl( "qrc:/res/index.html" ) );
+		page->setHtml( q->htmlContent( "." ) );
 
 		QObject::connect( editor, &QPlainTextEdit::textChanged,
 			[this] ()
@@ -173,6 +175,7 @@ MainWindow::openFile( const QString & path )
 		return;
 	}
 
+	d->page->setHtml( htmlContent( QFileInfo( path ).absoluteDir().absolutePath() ) );
 	d->editor->setDocName( path );
 	d->editor->setPlainText( f.readAll() );
 	f.close();
@@ -197,6 +200,7 @@ MainWindow::onFileNew()
 	}
 
 	d->editor->setDocName( QStringLiteral( "default.md" ) );
+	d->page->setHtml( htmlContent( "." ) );
 	d->editor->setPlainText( "" );
 	d->editor->document()->setModified( false );
 }
@@ -258,6 +262,9 @@ MainWindow::onFileSaveAs()
 		return;
 
 	d->editor->setDocName( dialog.selectedFiles().constFirst() );
+	d->page->setHtml( htmlContent( QFileInfo( d->editor->docName() )
+		.absoluteDir().absolutePath() ) );
+
 	onFileSave();
 }
 
@@ -272,6 +279,39 @@ MainWindow::closeEvent( QCloseEvent * e )
 		if( button != QMessageBox::Yes )
 			e->ignore();
 	}
+}
+
+QString
+MainWindow::htmlContent( const QString & baseUrl ) const
+{
+	return QStringLiteral( "<!doctype html>\n"
+					"<meta charset=\"utf-8\">\n"
+					"<head>\n"
+					"  <script src=\"qrc:/qtwebchannel/qwebchannel.js\"></script>\n"
+					"</head>\n"
+					"<body>\n"
+					"  <base href=\"%1\" />\n"
+					"  <div id=\"placeholder\" class=\"markdown-body\"></div>\n"
+					"  <script>\n"
+					"  'use strict';\n"
+					"\n"
+					"  var placeholder = document.getElementById('placeholder');\n"
+					"\n"
+					"  var updateText = function(text) {\n"
+					"	  placeholder.innerHTML = text;\n"
+					"  }\n"
+					"\n"
+					"  new QWebChannel(qt.webChannelTransport,\n"
+					"	function(channel) {\n"
+					"	  var content = channel.objects.content;\n"
+					"	  updateText(content.text);\n"
+					"	  content.textChanged.connect(updateText);\n"
+					"	}\n"
+					"  );\n"
+					"  </script>\n"
+					"</body>\n"
+					"</html>" )
+		.arg( baseUrl );
 }
 
 } /* namespace MdEditor */
