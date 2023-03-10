@@ -47,9 +47,22 @@ public:
 
 protected:
 	void resizeEvent( QResizeEvent * e ) override;
+    void closeEvent( QCloseEvent * e ) override;
+
+private slots:
+    void onFileNew();
+    void onFileOpen();
+    void onFileSave();
+    void onFileSaveAs();
+
+private:
+    bool isModified() const;
+	void openFile( const QString & path );
 
 private:
 	Q_DISABLE_COPY( MainWindow )
+
+	friend struct MainWindowPrivate;
 
 	QScopedPointer< MainWindowPrivate > d;
 }; // class MainWindow

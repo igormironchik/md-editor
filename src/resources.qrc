@@ -1,6 +1,10 @@
 <RCC>
     <qresource prefix="/">
         <file>res/img/application-exit.png</file>
+        <file>res/img/document-new.png</file>
+        <file>res/img/document-open.png</file>
+        <file>res/img/document-save.png</file>
+        <file>res/img/document-save-as.png</file>
         <file>res/img/icon_16x16.png</file>
         <file>res/img/icon_24x24.png</file>
         <file>res/img/icon_32x32.png</file>

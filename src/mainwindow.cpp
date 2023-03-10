@@ -33,6 +33,12 @@
 #include <QHBoxLayout>
 #include <QResizeEvent>
 #include <QWebChannel>
+#include <QMessageBox>
+#include <QFileDialog>
+#include <QCloseEvent>
+#include <QMenu>
+#include <QAction>
+#include <QMenuBar>
 
 // md4qt include.
 #define MD4QT_QT_SUPPORT
@@ -93,6 +99,23 @@ struct MainWindowPrivate {
 			} );
 
 		editor->setDocName( QStringLiteral( "default.md" ) );
+
+		auto fileMenu = q->menuBar()->addMenu( MainWindow::tr( "&File" ) );
+		newAction = fileMenu->addAction( QIcon( QStringLiteral( ":/res/img/document-new.png" ) ),
+				MainWindow::tr( "New" ), MainWindow::tr( "Ctrl+N" ), q, &MainWindow::onFileNew );
+		openAction = fileMenu->addAction( QIcon( QStringLiteral( ":/res/img/document-open.png" ) ),
+				MainWindow::tr( "Open" ), MainWindow::tr( "Ctrl+O" ), q, &MainWindow::onFileOpen );
+		fileMenu->addSeparator();
+		saveAction = fileMenu->addAction( QIcon( QStringLiteral( ":/res/img/document-save.png" ) ),
+			MainWindow::tr( "Save" ), MainWindow::tr( "Ctrl+S" ), q, &MainWindow::onFileSave );
+		saveAsAction = fileMenu->addAction( QIcon( QStringLiteral( ":/res/img/document-save-as.png" ) ),
+			MainWindow::tr( "Save As" ), q, &MainWindow::onFileSaveAs );
+		fileMenu->addSeparator();
+		fileMenu->addAction( QIcon( QStringLiteral( ":/res/img/application-exit.png" ) ),
+			MainWindow::tr( "Quit" ), q, &QWidget::close );
+
+		QObject::connect( editor->document(), &QTextDocument::modificationChanged,
+			saveAction, &QAction::setEnabled );
 	}
 
 	MainWindow * q = nullptr;
@@ -101,6 +124,10 @@ struct MainWindowPrivate {
 	PreviewPage * page = nullptr;
 	QSplitter * splitter = nullptr;
 	HtmlDocument * html = nullptr;
+	QAction * newAction = nullptr;
+	QAction * openAction = nullptr;
+	QAction * saveAction = nullptr;
+	QAction * saveAsAction = nullptr;
 	bool init = false;
 }; // struct MainWindowPrivate
 
@@ -132,6 +159,119 @@ MainWindow::resizeEvent( QResizeEvent * e )
 	}
 
 	e->accept();
+}
+
+void
+MainWindow::openFile( const QString & path )
+{
+	QFile f( path );
+	if( !f.open( QIODevice::ReadOnly ) )
+	{
+		QMessageBox::warning( this, windowTitle(),
+			tr( "Could not open file %1: %2" ).arg(
+				QDir::toNativeSeparators( path ), f.errorString() ) );
+		return;
+	}
+
+	d->editor->setDocName( path );
+	d->editor->setPlainText( f.readAll() );
+	f.close();
+}
+
+bool
+MainWindow::isModified() const
+{
+	return d->editor->document()->isModified();
+}
+
+void
+MainWindow::onFileNew()
+{
+	if( isModified() )
+	{
+		QMessageBox::StandardButton button = QMessageBox::question( this, windowTitle(),
+			tr( "You have unsaved changes. Do you want to create a new document anyway?" ) );
+
+		if( button != QMessageBox::Yes )
+			return;
+	}
+
+	d->editor->setDocName( QStringLiteral( "default.md" ) );
+	d->editor->setPlainText( "" );
+	d->editor->document()->setModified( false );
+}
+
+void
+MainWindow::onFileOpen()
+{
+	if( isModified() )
+	{
+		QMessageBox::StandardButton button = QMessageBox::question( this, windowTitle(),
+			tr( "You have unsaved changes. Do you want to open a new document anyway?" ) );
+
+		if( button != QMessageBox::Yes )
+			return;
+	}
+
+	QFileDialog dialog( this, tr( "Open MarkDown File" ) );
+	dialog.setMimeTypeFilters( { "text/markdown" } );
+	dialog.setAcceptMode( QFileDialog::AcceptOpen );
+
+	if( dialog.exec() == QDialog::Accepted )
+		openFile( dialog.selectedFiles().constFirst() );
+}
+
+void
+MainWindow::onFileSave()
+{
+	if( d->editor->docName() == QStringLiteral( "default.md" ) )
+	{
+		onFileSaveAs();
+		return;
+	}
+
+	QFile f( d->editor->docName() );
+	if( !f.open( QIODevice::WriteOnly | QIODevice::Text ) )
+	{
+		QMessageBox::warning( this, windowTitle(),
+			tr( "Could not write to file %1: %2" ).arg(
+				QDir::toNativeSeparators( d->editor->docName() ), f.errorString() ) );
+
+		return;
+	}
+
+	QTextStream str( &f );
+	str << d->editor->toPlainText();
+
+	d->editor->document()->setModified( false );
+}
+
+void
+MainWindow::onFileSaveAs()
+{
+	QFileDialog dialog( this, tr( "Save MarkDown File" ) );
+	dialog.setMimeTypeFilters( { "text/markdown" } );
+	dialog.setAcceptMode( QFileDialog::AcceptSave );
+	dialog.setDefaultSuffix( "md" );
+
+	if( dialog.exec() != QDialog::Accepted )
+		return;
+
+	d->editor->setDocName( dialog.selectedFiles().constFirst() );
+	onFileSave();
+}
+
+void
+MainWindow::closeEvent( QCloseEvent * e )
+{
+	if( isModified() )
+	{
+		QMessageBox::StandardButton button = QMessageBox::question( this, windowTitle(),
+			tr( "You have unsaved changes. Do you want to exit anyway?" ) );
+
+		if( button != QMessageBox::Yes )
+			e->ignore();
+	}
 }
 
 } /* namespace MdEditor */
