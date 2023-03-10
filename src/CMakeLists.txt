@@ -11,7 +11,13 @@ set( SRC main.cpp
 	editor.hpp
 	editor.cpp
 	mainwindow.hpp
-	mainwindow.cpp )
+	mainwindow.cpp
+	webview.hpp
+	webview.cpp
+	previewpage.hpp
+	previewpage.cpp
+	htmldocument.hpp
+	htmldocument.cpp )
 
 qt6_add_resources( SRC resources.qrc )
 

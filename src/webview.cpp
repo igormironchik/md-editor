@@ -21,50 +21,46 @@
 */
 
 // md-editor include.
-#include "editor.hpp"
+#include "webview.hpp"
+
+// Qt include.
+#include <QContextMenuEvent>
 
 
 namespace MdEditor {
 
 //
-// EditorPrivate
+// WebViewPrivate
 //
 
-struct EditorPrivate {
-	EditorPrivate( Editor * parent )
+struct WebViewPrivate {
+	WebViewPrivate( WebView * parent )
 		:	q( parent )
 	{
 	}
 
-	Editor * q;
-	QString docName;
-}; // struct EditorPrivate
+	void initUi()
+	{
+		q->setContextMenuPolicy( Qt::NoContextMenu );
+	}
+
+	WebView * q;
+}; // struct WebViewPrivate
 
 
 //
-// Editor
+// WebView
 //
 
-Editor::Editor( QWidget * parent )
-	:	QPlainTextEdit( parent )
-	,	d( new EditorPrivate( this ) )
+WebView::WebView( QWidget * parent )
+	:	QWebEngineView( parent )
+	,	d( new WebViewPrivate( this ) )
 {
+	d->initUi();
 }
 
-Editor::~Editor()
+WebView::~WebView()
 {
-}
-
-void
-Editor::setDocName( const QString & name )
-{
-	d->docName = name;
-}
-
-const QString &
-Editor::docName() const
-{
-	return d->docName;
 }
 
 } /* namespace MdEditor */

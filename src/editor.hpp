@@ -45,6 +45,9 @@ public:
 	explicit Editor( QWidget * parent );
 	~Editor() override;
 
+	void setDocName( const QString & name );
+	const QString & docName() const;
+
 private:
 	Q_DISABLE_COPY( Editor )
 

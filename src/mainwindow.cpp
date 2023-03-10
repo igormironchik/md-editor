@@ -23,13 +23,22 @@
 // md-editor include.
 #include "mainwindow.hpp"
 #include "editor.hpp"
+#include "webview.hpp"
+#include "previewpage.hpp"
+#include "htmldocument.hpp"
 
 // Qt include.
 #include <QSplitter>
-#include <QWebEngineView>
 #include <QWidget>
 #include <QHBoxLayout>
 #include <QResizeEvent>
+#include <QWebChannel>
+
+// md4qt include.
+#define MD4QT_QT_SUPPORT
+#include <md4qt/traits.hpp>
+#include <md4qt/parser.hpp>
+#include <md4qt/html.hpp>
 
 
 namespace MdEditor {
@@ -50,7 +59,7 @@ struct MainWindowPrivate {
 		auto l = new QHBoxLayout( w );
 		splitter = new QSplitter( Qt::Horizontal, w );
 		editor = new Editor( w );
-		preview = new QWebEngineView( w );
+		preview = new WebView( w );
 
 		splitter->addWidget( editor );
 		splitter->addWidget( preview );
@@ -59,12 +68,39 @@ struct MainWindowPrivate {
 
 		q->setCentralWidget( w );
 		q->setWindowTitle( MainWindow::tr( "Markdown Editor" ) );
+
+		page = new PreviewPage( q );
+		preview->setPage( page );
+
+		html = new HtmlDocument( q );
+
+		auto channel = new QWebChannel( q );
+		channel->registerObject( QStringLiteral( "content" ), html );
+		page->setWebChannel( channel );
+
+		preview->setUrl( QUrl( "qrc:/res/index.html" ) );
+
+		QObject::connect( editor, &QPlainTextEdit::textChanged,
+			[this] ()
+			{
+				auto md = editor->toPlainText();
+				QTextStream stream( &md );
+
+				MD::Parser< MD::QStringTrait > parser;
+				const auto doc = parser.parse( stream, editor->docName() );
+
+				html->setText( MD::toHtml( doc ) );
+			} );
+
+		editor->setDocName( QStringLiteral( "default.md" ) );
 	}
 
 	MainWindow * q = nullptr;
 	Editor * editor = nullptr;
-	QWebEngineView * preview = nullptr;
+	WebView * preview = nullptr;
+	PreviewPage * page = nullptr;
 	QSplitter * splitter = nullptr;
+	HtmlDocument * html = nullptr;
 	bool init = false;
 }; // struct MainWindowPrivate
 

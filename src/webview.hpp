@@ -20,51 +20,35 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// md-editor include.
-#include "editor.hpp"
+#pragma once
+
+// Qt include.
+#include <QWebEngineView>
+#include <QScopedPointer>
 
 
 namespace MdEditor {
 
 //
-// EditorPrivate
+// WebView
 //
 
-struct EditorPrivate {
-	EditorPrivate( Editor * parent )
-		:	q( parent )
-	{
-	}
+struct WebViewPrivate;
 
-	Editor * q;
-	QString docName;
-}; // struct EditorPrivate
-
-
-//
-// Editor
-//
-
-Editor::Editor( QWidget * parent )
-	:	QPlainTextEdit( parent )
-	,	d( new EditorPrivate( this ) )
+//! HTML preview.
+class WebView
+	:	public QWebEngineView
 {
-}
+	Q_OBJECT
 
-Editor::~Editor()
-{
-}
+public:
+	explicit WebView( QWidget * parent );
+	~WebView() override;
 
-void
-Editor::setDocName( const QString & name )
-{
-	d->docName = name;
-}
+private:
+	Q_DISABLE_COPY( WebView )
 
-const QString &
-Editor::docName() const
-{
-	return d->docName;
-}
+	QScopedPointer< WebViewPrivate > d;
+}; // class WebView
 
 } /* namespace MdEditor */
