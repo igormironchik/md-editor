@@ -53,7 +53,6 @@ struct EditorPrivate {
 		q->updateLineNumberAreaWidth( 0 );
 		q->highlightCurrentLine();
 		q->showUnprintableCharacters( true );
-		q->setTabStopDistance( q->fontMetrics().horizontalAdvance( QLatin1Char( ' ' ) ) * 4 );
 	}
 
 	Editor * q = nullptr;
@@ -260,6 +259,8 @@ Editor::showUnprintableCharacters( bool on )
 	}
 	else
 		document()->setDefaultTextOption( {} );
+
+	setTabStopDistance( fontMetrics().horizontalAdvance( QLatin1Char( ' ' ) ) * 4 );
 }
 
 void
