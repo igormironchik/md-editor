@@ -455,7 +455,8 @@ MainWindow::onLineHovered( int lineNumber, const QPoint & pos )
 							( (*iit)->type() == MD::ItemType::Code &&
 								inRange( (*iit)->startLine() - 1, (*iit)->endLine() + 1, lineNumber ) ) )
 						{
-							QToolTip::showText( pos, itemType( (*iit)->type() ) );
+							QToolTip::showText( pos, tr( "%1 in %2" )
+								.arg( itemType( (*iit)->type() ), itemType( (*it)->type() ) ) );
 
 							exit = true;
 
