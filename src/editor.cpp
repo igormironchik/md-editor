@@ -51,6 +51,10 @@ struct EditorPrivate {
 			q, &Editor::updateLineNumberArea );
 		QObject::connect( q, &Editor::cursorPositionChanged,
 			q, &Editor::highlightCurrentLine );
+		QObject::connect( lineNumberArea, &LineNumberArea::lineHovered,
+			q, &Editor::lineHovered );
+		QObject::connect( lineNumberArea, &LineNumberArea::hoverLeaved,
+			q, &Editor::hoverLeaved );
 
 		q->setFont( QFontDatabase::systemFont( QFontDatabase::FixedFont ) );
 
@@ -189,6 +193,67 @@ Editor::lineNumberAreaPaintEvent( QPaintEvent * event )
 		top = bottom;
 		bottom = top + qRound( blockBoundingRect( block ).height() );
 		++blockNumber;
+	}
+}
+
+int
+Editor::lineNumber( const QPoint & p )
+{
+	QTextBlock block = firstVisibleBlock();
+	int blockNumber = block.blockNumber();
+	int top = qRound( blockBoundingGeometry( block ).translated( contentOffset() ).top() );
+	int bottom = top + qRound( blockBoundingRect( block ).height() );
+
+	while( block.isValid() && top <= p.y() )
+	{
+		if( block.isVisible() && bottom >= p.y() )
+			return blockNumber;
+
+		block = block.next();
+		top = bottom;
+		bottom = top + qRound( blockBoundingRect( block ).height() );
+		++blockNumber;
+	}
+
+	return -1;
+}
+
+void
+LineNumberArea::enterEvent( QEnterEvent * event )
+{
+	onHover( event->position().toPoint() );
+
+	event->ignore();
+}
+
+void
+LineNumberArea::mouseMoveEvent( QMouseEvent * event )
+{
+	onHover( event->position().toPoint() );
+
+	event->ignore();
+}
+
+void
+LineNumberArea::leaveEvent( QEvent * event )
+{
+	lineNumber = -1;
+
+	emit hoverLeaved();
+
+	event->ignore();
+}
+
+void
+LineNumberArea::onHover( const QPoint & p )
+{
+	const auto ln = codeEditor->lineNumber( p );
+
+	if( ln != lineNumber )
+	{
+		lineNumber = ln;
+
+		emit lineHovered( lineNumber );
 	}
 }
 

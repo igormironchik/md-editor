@@ -120,6 +120,7 @@ struct MainWindowPrivate {
 		QObject::connect( editor->document(), &QTextDocument::modificationChanged,
 			q, &MainWindow::setWindowModified );
 		QObject::connect( editor, &QPlainTextEdit::textChanged, q, &MainWindow::onTextChanged );
+		QObject::connect( editor, &Editor::lineHovered, q, &MainWindow::onLineHovered );
 	}
 
 	MainWindow * q = nullptr;
@@ -356,6 +357,11 @@ void
 MainWindow::onAboutQt()
 {
 	QMessageBox::aboutQt( this );
+}
+
+void
+MainWindow::onLineHovered( int lineNumber )
+{
 }
 
 } /* namespace MdEditor */

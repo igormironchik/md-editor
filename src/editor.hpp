@@ -41,6 +41,10 @@ class Editor
 {
 	Q_OBJECT
 
+signals:
+	void lineHovered( int lineNumber );
+	void hoverLeaved();
+
 public:
 	explicit Editor( QWidget * parent );
 	~Editor() override;
@@ -59,8 +63,12 @@ private slots:
 protected:
 	void resizeEvent( QResizeEvent * event ) override;
 
+protected:
+	int lineNumber( const QPoint & p );
+
 private:
 	friend struct EditorPrivate;
+	friend class LineNumberArea;
 
 	Q_DISABLE_COPY( Editor )
 
@@ -76,11 +84,19 @@ private:
 class LineNumberArea
 	:	public QWidget
 {
+	Q_OBJECT
+
+signals:
+	void lineHovered( int lineNumber );
+	void hoverLeaved();
+
 public:
     LineNumberArea( Editor * editor )
 		:	QWidget( editor )
 		,	codeEditor( editor )
-    {}
+    {
+		setMouseTracking( true );
+	}
 
     QSize sizeHint() const override
     {
@@ -93,8 +109,16 @@ protected:
         codeEditor->lineNumberAreaPaintEvent( event );
     }
 
+	void enterEvent( QEnterEvent * event ) override;
+	void mouseMoveEvent( QMouseEvent * event ) override;
+	void leaveEvent( QEvent * event ) override;
+
+private:
+	void onHover( const QPoint & p );
+
 private:
     Editor * codeEditor;
+	int lineNumber = -1;
 }; // class LineNumberArea
 
 } /* namespace MdEditor */
