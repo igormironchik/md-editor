@@ -89,7 +89,6 @@ struct MainWindowPrivate {
 		editor->setDocName( QStringLiteral( "default.md" ) );
 
 		q->setWindowTitle( MainWindow::tr( "%1[*] - Markdown Editor" ).arg( editor->docName() ) );
-		editor->setFont( QFontDatabase::systemFont( QFontDatabase::FixedFont ) );
 
 		auto fileMenu = q->menuBar()->addMenu( MainWindow::tr( "&File" ) );
 		newAction = fileMenu->addAction( QIcon( QStringLiteral( ":/res/img/document-new.png" ) ),

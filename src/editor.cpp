@@ -26,6 +26,7 @@
 // Qt include.
 #include <QPainter>
 #include <QTextBlock>
+#include <QTextDocument>
 
 
 namespace MdEditor {
@@ -51,8 +52,17 @@ struct EditorPrivate {
 		QObject::connect( q, &Editor::cursorPositionChanged,
 			q, &Editor::highlightCurrentLine );
 
+		q->setFont( QFontDatabase::systemFont( QFontDatabase::FixedFont ) );
+
 		q->updateLineNumberAreaWidth( 0 );
 		q->highlightCurrentLine();
+
+		QTextOption opt;
+		opt.setFlags( QTextOption::ShowTabsAndSpaces );
+
+		q->document()->setDefaultTextOption( opt );
+
+		q->setTabStopDistance( q->fontMetrics().horizontalAdvance( QLatin1Char( ' ' ) ) * 4 );
 	}
 
 	Editor * q = nullptr;
