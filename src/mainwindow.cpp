@@ -414,6 +414,12 @@ itemType( MD::ItemType t )
 	return QString();
 }
 
+inline bool
+inRange( long long int start, long long int end, int pos )
+{
+	return ( pos >= start && pos <= end );
+}
+
 } /* namespace anonymous */
 
 void
@@ -421,10 +427,54 @@ MainWindow::onLineHovered( int lineNumber, const QPoint & pos )
 {
 	for( auto it = d->mdDoc->items().cbegin(), last = d->mdDoc->items().cend(); it != last; ++it )
 	{
-		if( (*it)->startLine() == lineNumber ||
-			( (*it)->type() == MD::ItemType::Code && (*it)->startLine() - 1 == lineNumber ) )
+		if( (*it)->type() == MD::ItemType::List )
+		{
+			bool exit = false;
+
+			auto list = static_cast< MD::List< MD::QStringTrait > * > ( it->get() );
+
+			for( auto lit = list->items().cbegin(), llast = list->items().cend();
+				lit != llast; ++lit )
+			{
+				if( (*lit)->startLine() == lineNumber )
+				{
+					QToolTip::showText( pos, itemType( (*it)->type() ) );
+
+					exit = true;
+
+					break;
+				}
+				else
+				{
+					auto listItem = static_cast< MD::ListItem< MD::QStringTrait > * > ( lit->get() );
+
+					for( auto iit = listItem->items().cbegin(), ilast = listItem->items().cend();
+						 iit != ilast; ++iit )
+					{
+						if( inRange( (*iit)->startLine(), (*iit)->endLine(), lineNumber ) ||
+							( (*iit)->type() == MD::ItemType::Code &&
+								inRange( (*iit)->startLine() - 1, (*iit)->endLine() + 1, lineNumber ) ) )
+						{
+							QToolTip::showText( pos, itemType( (*iit)->type() ) );
+
+							exit = true;
+
+							break;
+						}
+					}
+				}
+			}
+
+			if( exit )
+				break;
+		}
+		else if( inRange( (*it)->startLine(), (*it)->endLine(), lineNumber ) ||
+			( (*it)->type() == MD::ItemType::Code &&
+				inRange( (*it)->startLine() - 1, (*it)->endLine() + 1, lineNumber ) ) )
 		{
 			QToolTip::showText( pos, itemType( (*it)->type() ) );
+
+			break;
 		}
 	}
 }
