@@ -23,6 +23,7 @@
 // Qt include.
 #include <QString>
 #include <QApplication>
+#include <QScreen>
 
 // md-editor include.
 #include "mainwindow.hpp"
@@ -42,7 +43,9 @@ int main( int argc, char ** argv )
 	app.setWindowIcon( appIcon );
 
 	MdEditor::MainWindow w;
-	w.resize( 800, 600 );
+	const auto screenSize = app.primaryScreen()->availableGeometry().size();
+	w.resize( qRound( (double) screenSize.width() * 0.85 ),
+		qRound( (double) screenSize.height() * 0.85 ) );
 	w.show();
 
 	return QApplication::exec();
