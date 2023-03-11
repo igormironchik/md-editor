@@ -54,6 +54,7 @@ private slots:
     void onFileOpen();
     void onFileSave();
     void onFileSaveAs();
+	void onTextChanged();
 
 private:
     bool isModified() const;

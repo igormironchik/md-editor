@@ -75,7 +75,6 @@ struct MainWindowPrivate {
 		l->addWidget( splitter );
 
 		q->setCentralWidget( w );
-		q->setWindowTitle( MainWindow::tr( "Markdown Editor" ) );
 
 		page = new PreviewPage( q );
 		preview->setPage( page );
@@ -87,20 +86,10 @@ struct MainWindowPrivate {
 		page->setWebChannel( channel );
 
 		page->setHtml( q->htmlContent( "." ) );
-
-		QObject::connect( editor, &QPlainTextEdit::textChanged,
-			[this] ()
-			{
-				auto md = editor->toPlainText();
-				QTextStream stream( &md );
-
-				MD::Parser< MD::QStringTrait > parser;
-				const auto doc = parser.parse( stream, editor->docName() );
-
-				html->setText( MD::toHtml( doc ) );
-			} );
-
 		editor->setDocName( QStringLiteral( "default.md" ) );
+
+		q->setWindowTitle( MainWindow::tr( "%1[*] - Markdown Editor" ).arg( editor->docName() ) );
+		editor->setFont( QFontDatabase::systemFont( QFontDatabase::FixedFont ) );
 
 		auto fileMenu = q->menuBar()->addMenu( MainWindow::tr( "&File" ) );
 		newAction = fileMenu->addAction( QIcon( QStringLiteral( ":/res/img/document-new.png" ) ),
@@ -118,6 +107,9 @@ struct MainWindowPrivate {
 
 		QObject::connect( editor->document(), &QTextDocument::modificationChanged,
 			saveAction, &QAction::setEnabled );
+		QObject::connect( editor->document(), &QTextDocument::modificationChanged,
+			q, &MainWindow::setWindowModified );
+		QObject::connect( editor, &QPlainTextEdit::textChanged, q, &MainWindow::onTextChanged );
 	}
 
 	MainWindow * q = nullptr;
@@ -131,6 +123,7 @@ struct MainWindowPrivate {
 	QAction * saveAction = nullptr;
 	QAction * saveAsAction = nullptr;
 	bool init = false;
+	std::shared_ptr< MD::Document< MD::QStringTrait > > mdDoc;
 }; // struct MainWindowPrivate
 
 
@@ -179,6 +172,8 @@ MainWindow::openFile( const QString & path )
 	d->editor->setDocName( path );
 	d->editor->setPlainText( f.readAll() );
 	f.close();
+	setWindowTitle( MainWindow::tr( "%1[*] - Markdown Editor" )
+		.arg( QFileInfo( d->editor->docName() ).fileName() ) );
 }
 
 bool
@@ -193,7 +188,8 @@ MainWindow::onFileNew()
 	if( isModified() )
 	{
 		QMessageBox::StandardButton button = QMessageBox::question( this, windowTitle(),
-			tr( "You have unsaved changes. Do you want to create a new document anyway?" ) );
+			tr( "You have unsaved changes. Do you want to create a new document anyway?" ),
+			QMessageBox::Yes | QMessageBox::No, QMessageBox::No );
 
 		if( button != QMessageBox::Yes )
 			return;
@@ -203,6 +199,7 @@ MainWindow::onFileNew()
 	d->page->setHtml( htmlContent( "." ) );
 	d->editor->setPlainText( "" );
 	d->editor->document()->setModified( false );
+	setWindowTitle( MainWindow::tr( "%1[*] - Markdown Editor" ).arg( d->editor->docName() ) );
 }
 
 void
@@ -211,7 +208,8 @@ MainWindow::onFileOpen()
 	if( isModified() )
 	{
 		QMessageBox::StandardButton button = QMessageBox::question( this, windowTitle(),
-			tr( "You have unsaved changes. Do you want to open a new document anyway?" ) );
+			tr( "You have unsaved changes. Do you want to open a new document anyway?" ),
+			QMessageBox::Yes | QMessageBox::No, QMessageBox::No );
 
 		if( button != QMessageBox::Yes )
 			return;
@@ -274,7 +272,8 @@ MainWindow::closeEvent( QCloseEvent * e )
 	if( isModified() )
 	{
 		QMessageBox::StandardButton button = QMessageBox::question( this, windowTitle(),
-			tr( "You have unsaved changes. Do you want to exit anyway?" ) );
+			tr( "You have unsaved changes. Do you want to exit anyway?" ),
+			QMessageBox::Yes | QMessageBox::No, QMessageBox::No );
 
 		if( button != QMessageBox::Yes )
 			e->ignore();
@@ -285,33 +284,45 @@ QString
 MainWindow::htmlContent( const QString & baseUrl ) const
 {
 	return QStringLiteral( "<!doctype html>\n"
-					"<meta charset=\"utf-8\">\n"
-					"<head>\n"
-					"  <script src=\"qrc:/qtwebchannel/qwebchannel.js\"></script>\n"
-					"</head>\n"
-					"<body>\n"
-					"  <base href=\"%1\" />\n"
-					"  <div id=\"placeholder\" class=\"markdown-body\"></div>\n"
-					"  <script>\n"
-					"  'use strict';\n"
-					"\n"
-					"  var placeholder = document.getElementById('placeholder');\n"
-					"\n"
-					"  var updateText = function(text) {\n"
-					"	  placeholder.innerHTML = text;\n"
-					"  }\n"
-					"\n"
-					"  new QWebChannel(qt.webChannelTransport,\n"
-					"	function(channel) {\n"
-					"	  var content = channel.objects.content;\n"
-					"	  updateText(content.text);\n"
-					"	  content.textChanged.connect(updateText);\n"
-					"	}\n"
-					"  );\n"
-					"  </script>\n"
-					"</body>\n"
-					"</html>" )
-		.arg( baseUrl );
+		"<meta charset=\"utf-8\">\n"
+		"<head>\n"
+		"  <script src=\"qrc:/qtwebchannel/qwebchannel.js\"></script>\n"
+		"</head>\n"
+		"<body>\n"
+		"  <base href=\"%1\" />\n"
+		"  <div id=\"placeholder\" class=\"markdown-body\"></div>\n"
+		"  <script>\n"
+		"  'use strict';\n"
+		"\n"
+		"  var placeholder = document.getElementById('placeholder');\n"
+		"\n"
+		"  var updateText = function(text) {\n"
+		"	  placeholder.innerHTML = text;\n"
+		"  }\n"
+		"\n"
+		"  new QWebChannel(qt.webChannelTransport,\n"
+		"	function(channel) {\n"
+		"	  var content = channel.objects.content;\n"
+		"	  updateText(content.text);\n"
+		"	  content.textChanged.connect(updateText);\n"
+		"	}\n"
+		"  );\n"
+		"  </script>\n"
+		"</body>\n"
+		"</html>" )
+			.arg( baseUrl );
+}
+
+void
+MainWindow::onTextChanged()
+{
+	auto md = d->editor->toPlainText();
+	QTextStream stream( &md );
+
+	MD::Parser< MD::QStringTrait > parser;
+	d->mdDoc = parser.parse( stream, d->editor->docName() );
+
+	d->html->setText( MD::toHtml( d->mdDoc ) );
 }
 
 } /* namespace MdEditor */
