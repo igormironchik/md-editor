@@ -45,33 +45,21 @@ struct EditorPrivate {
 	{
 		lineNumberArea = new LineNumberArea( q );
 
-		QObject::connect( q, &Editor::blockCountChanged,
-			q, &Editor::updateLineNumberAreaWidth );
-		QObject::connect( q, &Editor::updateRequest,
-			q, &Editor::updateLineNumberArea );
 		QObject::connect( q, &Editor::cursorPositionChanged,
 			q, &Editor::highlightCurrentLine );
-		QObject::connect( lineNumberArea, &LineNumberArea::lineHovered,
-			q, &Editor::lineHovered );
-		QObject::connect( lineNumberArea, &LineNumberArea::hoverLeaved,
-			q, &Editor::hoverLeaved );
 
+		q->showLineNumbers( true );
 		q->setFont( QFontDatabase::systemFont( QFontDatabase::FixedFont ) );
-
 		q->updateLineNumberAreaWidth( 0 );
 		q->highlightCurrentLine();
-
-		QTextOption opt;
-		opt.setFlags( QTextOption::ShowTabsAndSpaces );
-
-		q->document()->setDefaultTextOption( opt );
-
+		q->showUnprintableCharacters( true );
 		q->setTabStopDistance( q->fontMetrics().horizontalAdvance( QLatin1Char( ' ' ) ) * 4 );
 	}
 
 	Editor * q = nullptr;
 	LineNumberArea * lineNumberArea = nullptr;
 	QString docName;
+	bool showLineNumberArea = true;
 }; // struct EditorPrivate
 
 
@@ -125,7 +113,10 @@ Editor::lineNumberAreaWidth()
 void
 Editor::updateLineNumberAreaWidth( int /* newBlockCount */ )
 {
-    setViewportMargins( lineNumberAreaWidth(), 0, 0, 0 );
+	if( d->showLineNumberArea )
+		setViewportMargins( lineNumberAreaWidth(), 0, 0, 0 );
+	else
+		setViewportMargins( 0, 0, 0, 0 );
 }
 
 void
@@ -255,6 +246,55 @@ LineNumberArea::onHover( const QPoint & p )
 
 		emit lineHovered( lineNumber, mapToGlobal( QPoint( width(), p.y() ) ) );
 	}
+}
+
+void
+Editor::showUnprintableCharacters( bool on )
+{
+	if( on )
+	{
+		QTextOption opt;
+		opt.setFlags( QTextOption::ShowTabsAndSpaces );
+
+		document()->setDefaultTextOption( opt );
+	}
+	else
+		document()->setDefaultTextOption( {} );
+}
+
+void
+Editor::showLineNumbers( bool on )
+{
+	if( on )
+	{
+		connect( this, &Editor::blockCountChanged,
+			this, &Editor::updateLineNumberAreaWidth );
+		connect( this, &Editor::updateRequest,
+			this, &Editor::updateLineNumberArea );
+		connect( d->lineNumberArea, &LineNumberArea::lineHovered,
+			this, &Editor::lineHovered );
+		connect( d->lineNumberArea, &LineNumberArea::hoverLeaved,
+			this, &Editor::hoverLeaved );
+
+		d->lineNumberArea->show();
+		d->showLineNumberArea = true;
+	}
+	else
+	{
+		disconnect( this, &Editor::blockCountChanged,
+			this, &Editor::updateLineNumberAreaWidth );
+		disconnect( this, &Editor::updateRequest,
+			this, &Editor::updateLineNumberArea );
+		disconnect( d->lineNumberArea, &LineNumberArea::lineHovered,
+			this, &Editor::lineHovered );
+		disconnect( d->lineNumberArea, &LineNumberArea::hoverLeaved,
+			this, &Editor::hoverLeaved );
+
+		d->lineNumberArea->hide();
+		d->showLineNumberArea = false;
+	}
+
+	updateLineNumberAreaWidth( 0 );
 }
 
 } /* namespace MdEditor */

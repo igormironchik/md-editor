@@ -106,6 +106,23 @@ struct MainWindowPrivate {
 		fileMenu->addAction( QIcon( QStringLiteral( ":/res/img/application-exit.png" ) ),
 			MainWindow::tr( "Quit" ), MainWindow::tr( "Ctrl+Q" ), q, &QWidget::close );
 
+		auto settingsMenu = q->menuBar()->addMenu( MainWindow::tr( "&Settings" ) );
+		auto toggleLineNumbersAction = new QAction(
+			QIcon( QStringLiteral( ":/res/img/view-table-of-contents-ltr.png" ) ),
+			MainWindow::tr( "Show Line Numbers" ), q );
+		toggleLineNumbersAction->setCheckable( true );
+		toggleLineNumbersAction->setShortcut( MainWindow::tr( "Ctrl+L" ) );
+		toggleLineNumbersAction->setChecked( true );
+		settingsMenu->addAction( toggleLineNumbersAction );
+
+		auto toggleUnprintableCharacters = new QAction(
+			QIcon( QStringLiteral( ":/res/img/character-set.png" ) ),
+			MainWindow::tr( "Show Tabs/Spaces" ), q );
+		toggleUnprintableCharacters->setCheckable( true );
+		toggleUnprintableCharacters->setShortcut( MainWindow::tr( "Ctrl+T" ) );
+		toggleUnprintableCharacters->setChecked( true );
+		settingsMenu->addAction( toggleUnprintableCharacters );
+
 		auto helpMenu = q->menuBar()->addMenu( MainWindow::tr( "&Help" ) );
 		helpMenu->addAction( QIcon( QStringLiteral( ":/res/img/icon_24x24.png" ) ),
 			MainWindow::tr( "About" ), q, &MainWindow::onAbout );
@@ -123,6 +140,10 @@ struct MainWindowPrivate {
 			q, &MainWindow::setWindowModified );
 		QObject::connect( editor, &QPlainTextEdit::textChanged, q, &MainWindow::onTextChanged );
 		QObject::connect( editor, &Editor::lineHovered, q, &MainWindow::onLineHovered );
+		QObject::connect( toggleLineNumbersAction, &QAction::toggled,
+			editor, &Editor::showLineNumbers );
+		QObject::connect( toggleUnprintableCharacters, &QAction::toggled,
+			editor, &Editor::showUnprintableCharacters );
 	}
 
 	MainWindow * q = nullptr;
@@ -428,57 +449,60 @@ inRange( long long int start, long long int end, int pos )
 void
 MainWindow::onLineHovered( int lineNumber, const QPoint & pos )
 {
-	for( auto it = d->mdDoc->items().cbegin(), last = d->mdDoc->items().cend(); it != last; ++it )
+	if( d->mdDoc.get() )
 	{
-		if( (*it)->type() == MD::ItemType::List || (*it)->type() == MD::ItemType::Footnote )
+		for( auto it = d->mdDoc->items().cbegin(), last = d->mdDoc->items().cend(); it != last; ++it )
 		{
-			bool exit = false;
-
-			auto list = static_cast< MD::List< MD::QStringTrait > * > ( it->get() );
-
-			for( auto lit = list->items().cbegin(), llast = list->items().cend();
-				lit != llast; ++lit )
+			if( (*it)->type() == MD::ItemType::List || (*it)->type() == MD::ItemType::Footnote )
 			{
-				if( (*lit)->startLine() == lineNumber )
+				bool exit = false;
+
+				auto list = static_cast< MD::List< MD::QStringTrait > * > ( it->get() );
+
+				for( auto lit = list->items().cbegin(), llast = list->items().cend();
+					lit != llast; ++lit )
 				{
-					QToolTip::showText( pos, itemType( (*it)->type() ) );
-
-					exit = true;
-
-					break;
-				}
-				else
-				{
-					auto listItem = static_cast< MD::ListItem< MD::QStringTrait > * > ( lit->get() );
-
-					for( auto iit = listItem->items().cbegin(), ilast = listItem->items().cend();
-						 iit != ilast; ++iit )
+					if( (*lit)->startLine() == lineNumber )
 					{
-						if( inRange( (*iit)->startLine(), (*iit)->endLine(), lineNumber ) ||
-							( (*iit)->type() == MD::ItemType::Code &&
-								inRange( (*iit)->startLine() - 1, (*iit)->endLine() + 1, lineNumber ) ) )
+						QToolTip::showText( pos, itemType( (*it)->type() ) );
+
+						exit = true;
+
+						break;
+					}
+					else
+					{
+						auto listItem = static_cast< MD::ListItem< MD::QStringTrait > * > ( lit->get() );
+
+						for( auto iit = listItem->items().cbegin(), ilast = listItem->items().cend();
+							 iit != ilast; ++iit )
 						{
-							QToolTip::showText( pos, tr( "%1 in %2" )
-								.arg( itemType( (*iit)->type() ), itemType( (*it)->type() ) ) );
+							if( inRange( (*iit)->startLine(), (*iit)->endLine(), lineNumber ) ||
+								( (*iit)->type() == MD::ItemType::Code &&
+									inRange( (*iit)->startLine() - 1, (*iit)->endLine() + 1, lineNumber ) ) )
+							{
+								QToolTip::showText( pos, tr( "%1 in %2" )
+									.arg( itemType( (*iit)->type() ), itemType( (*it)->type() ) ) );
 
-							exit = true;
+								exit = true;
 
-							break;
+								break;
+							}
 						}
 					}
 				}
+
+				if( exit )
+					break;
 			}
+			else if( inRange( (*it)->startLine(), (*it)->endLine(), lineNumber ) ||
+				( (*it)->type() == MD::ItemType::Code &&
+					inRange( (*it)->startLine() - 1, (*it)->endLine() + 1, lineNumber ) ) )
+			{
+				QToolTip::showText( pos, itemType( (*it)->type() ) );
 
-			if( exit )
 				break;
-		}
-		else if( inRange( (*it)->startLine(), (*it)->endLine(), lineNumber ) ||
-			( (*it)->type() == MD::ItemType::Code &&
-				inRange( (*it)->startLine() - 1, (*it)->endLine() + 1, lineNumber ) ) )
-		{
-			QToolTip::showText( pos, itemType( (*it)->type() ) );
-
-			break;
+			}
 		}
 	}
 }

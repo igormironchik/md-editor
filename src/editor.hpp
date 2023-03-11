@@ -55,6 +55,10 @@ public:
 	void lineNumberAreaPaintEvent( QPaintEvent * event );
 	int lineNumberAreaWidth();
 
+public slots:
+	void showUnprintableCharacters( bool on );
+	void showLineNumbers( bool on );
+
 private slots:
 	void updateLineNumberAreaWidth( int newBlockCount );
 	void highlightCurrentLine();
