@@ -48,10 +48,53 @@ public:
 	void setDocName( const QString & name );
 	const QString & docName() const;
 
+	void lineNumberAreaPaintEvent( QPaintEvent * event );
+	int lineNumberAreaWidth();
+
+private slots:
+	void updateLineNumberAreaWidth( int newBlockCount );
+	void highlightCurrentLine();
+	void updateLineNumberArea( const QRect & rect, int dy );
+
+protected:
+	void resizeEvent( QResizeEvent * event ) override;
+
 private:
+	friend struct EditorPrivate;
+
 	Q_DISABLE_COPY( Editor )
 
 	QScopedPointer< EditorPrivate > d;
 }; // class Editor
+
+
+//
+// LineNumberArea
+//
+
+//! Line number area.
+class LineNumberArea
+	:	public QWidget
+{
+public:
+    LineNumberArea( Editor * editor )
+		:	QWidget( editor )
+		,	codeEditor( editor )
+    {}
+
+    QSize sizeHint() const override
+    {
+        return QSize( codeEditor->lineNumberAreaWidth(), 0 );
+    }
+
+protected:
+    void paintEvent( QPaintEvent * event ) override
+    {
+        codeEditor->lineNumberAreaPaintEvent( event );
+    }
+
+private:
+    Editor * codeEditor;
+}; // class LineNumberArea
 
 } /* namespace MdEditor */
