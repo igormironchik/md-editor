@@ -110,6 +110,11 @@ struct MainWindowPrivate {
 		helpMenu->addAction( QIcon( QStringLiteral( ":/res/img/qt.png" ) ),
 			MainWindow::tr( "About Qt" ), q, &MainWindow::onAboutQt );
 
+		QFile css( ":/res/css/github-markdown.css" );
+		css.open( QIODevice::ReadOnly );
+		mdCss = css.readAll();
+		css.close();
+
 		QObject::connect( editor->document(), &QTextDocument::modificationChanged,
 			saveAction, &QAction::setEnabled );
 		QObject::connect( editor->document(), &QTextDocument::modificationChanged,
@@ -129,6 +134,7 @@ struct MainWindowPrivate {
 	QAction * saveAsAction = nullptr;
 	bool init = false;
 	std::shared_ptr< MD::Document< MD::QStringTrait > > mdDoc;
+	QString mdCss;
 }; // struct MainWindowPrivate
 
 
@@ -295,6 +301,9 @@ MainWindow::htmlContent( const QString & baseUrl ) const
 		"<meta charset=\"utf-8\">\n"
 		"<head>\n"
 		"  <script src=\"qrc:/qtwebchannel/qwebchannel.js\"></script>\n"
+		"  <style>\n"
+		"  %2\n"
+		"  </style>\n"
 		"</head>\n"
 		"<body>\n"
 		"  <base href=\"%1\" />\n"
@@ -318,7 +327,7 @@ MainWindow::htmlContent( const QString & baseUrl ) const
 		"  </script>\n"
 		"</body>\n"
 		"</html>" )
-			.arg( baseUrl );
+			.arg( baseUrl, d->mdCss );
 }
 
 void
