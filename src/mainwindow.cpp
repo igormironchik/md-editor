@@ -245,6 +245,9 @@ MainWindow::onFileSave()
 	str << d->editor->toPlainText();
 
 	d->editor->document()->setModified( false );
+
+	setWindowTitle( MainWindow::tr( "%1[*] - Markdown Editor" )
+		.arg( QFileInfo( d->editor->docName() ).fileName() ) );
 }
 
 void
