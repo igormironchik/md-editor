@@ -41,6 +41,7 @@
 #include <QMenuBar>
 #include <QFileInfo>
 #include <QDir>
+#include <QToolTip>
 
 // md4qt include.
 #define MD4QT_QT_SUPPORT
@@ -359,9 +360,73 @@ MainWindow::onAboutQt()
 	QMessageBox::aboutQt( this );
 }
 
-void
-MainWindow::onLineHovered( int lineNumber )
+namespace /* anonymous */ {
+
+inline QString
+itemType( MD::ItemType t )
 {
+	switch( t )
+	{
+		case MD::ItemType::Heading :
+			return MainWindow::tr( "Heading" );
+		case MD::ItemType::Text :
+			return MainWindow::tr( "Text" );
+		case MD::ItemType::Paragraph :
+			return MainWindow::tr( "Paragraph" );
+		case MD::ItemType::LineBreak :
+			return MainWindow::tr( "Line Break" );
+		case MD::ItemType::Blockquote :
+			return MainWindow::tr( "Blockquote" );
+		case MD::ItemType::ListItem :
+			return MainWindow::tr( "List Item" );
+		case MD::ItemType::List :
+			return MainWindow::tr( "List" );
+		case MD::ItemType::Link :
+			return MainWindow::tr( "Link" );
+		case MD::ItemType::Image :
+			return MainWindow::tr( "Image" );
+		case MD::ItemType::Code :
+			return MainWindow::tr( "Code" );
+		case MD::ItemType::TableCell :
+			return MainWindow::tr( "Table Cell" );
+		case MD::ItemType::TableRow :
+			return MainWindow::tr( "Table Row" );
+		case MD::ItemType::Table :
+			return MainWindow::tr( "Table" );
+		case MD::ItemType::FootnoteRef :
+			return MainWindow::tr( "Footnote Reference" );
+		case MD::ItemType::Footnote :
+			return MainWindow::tr( "Footnote" );
+		case MD::ItemType::Document :
+			return MainWindow::tr( "Document" );
+		case MD::ItemType::PageBreak :
+			return MainWindow::tr( "Page Break" );
+		case MD::ItemType::Anchor :
+			return MainWindow::tr( "Anchor" );
+		case MD::ItemType::HorizontalLine :
+			return MainWindow::tr( "Horizontal Line" );
+		case MD::ItemType::RawHtml :
+			return MainWindow::tr( "Raw HTML" );
+		case MD::ItemType::Math :
+			return MainWindow::tr( "LaTeX Math Expression" );
+	}
+
+	return QString();
+}
+
+} /* namespace anonymous */
+
+void
+MainWindow::onLineHovered( int lineNumber, const QPoint & pos )
+{
+	for( auto it = d->mdDoc->items().cbegin(), last = d->mdDoc->items().cend(); it != last; ++it )
+	{
+		if( (*it)->startLine() == lineNumber ||
+			( (*it)->type() == MD::ItemType::Code && (*it)->startLine() - 1 == lineNumber ) )
+		{
+			QToolTip::showText( pos, itemType( (*it)->type() ) );
+		}
+	}
 }
 
 } /* namespace MdEditor */

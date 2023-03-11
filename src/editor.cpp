@@ -253,7 +253,7 @@ LineNumberArea::onHover( const QPoint & p )
 	{
 		lineNumber = ln;
 
-		emit lineHovered( lineNumber );
+		emit lineHovered( lineNumber, mapToGlobal( QPoint( width(), p.y() ) ) );
 	}
 }
 

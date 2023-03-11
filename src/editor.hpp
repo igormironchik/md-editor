@@ -42,7 +42,7 @@ class Editor
 	Q_OBJECT
 
 signals:
-	void lineHovered( int lineNumber );
+	void lineHovered( int lineNumber, const QPoint & pos );
 	void hoverLeaved();
 
 public:
@@ -87,7 +87,7 @@ class LineNumberArea
 	Q_OBJECT
 
 signals:
-	void lineHovered( int lineNumber );
+	void lineHovered( int lineNumber, const QPoint & pos );
 	void hoverLeaved();
 
 public:

@@ -57,7 +57,7 @@ private slots:
 	void onTextChanged();
 	void onAbout();
 	void onAboutQt();
-	void onLineHovered( int lineNumber );
+	void onLineHovered( int lineNumber, const QPoint & pos );
 
 private:
     bool isModified() const;
