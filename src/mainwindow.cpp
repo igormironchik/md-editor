@@ -427,7 +427,7 @@ MainWindow::onLineHovered( int lineNumber, const QPoint & pos )
 {
 	for( auto it = d->mdDoc->items().cbegin(), last = d->mdDoc->items().cend(); it != last; ++it )
 	{
-		if( (*it)->type() == MD::ItemType::List )
+		if( (*it)->type() == MD::ItemType::List || (*it)->type() == MD::ItemType::Footnote )
 		{
 			bool exit = false;
 
