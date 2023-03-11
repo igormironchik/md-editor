@@ -42,6 +42,7 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QToolTip>
+#include <QStandardPaths>
 
 // md4qt include.
 #define MD4QT_QT_SUPPORT
@@ -228,7 +229,8 @@ MainWindow::onFileOpen()
 			return;
 	}
 
-	QFileDialog dialog( this, tr( "Open MarkDown File" ) );
+	QFileDialog dialog( this, tr( "Open Markdown File" ),
+		QStandardPaths::standardLocations( QStandardPaths::HomeLocation ).first() );
 	dialog.setMimeTypeFilters( { "text/markdown" } );
 	dialog.setAcceptMode( QFileDialog::AcceptOpen );
 
@@ -267,7 +269,8 @@ MainWindow::onFileSave()
 void
 MainWindow::onFileSaveAs()
 {
-	QFileDialog dialog( this, tr( "Save MarkDown File" ) );
+	QFileDialog dialog( this, tr( "Save Markdown File" ),
+		QStandardPaths::standardLocations( QStandardPaths::HomeLocation ).first() );
 	dialog.setMimeTypeFilters( { "text/markdown" } );
 	dialog.setAcceptMode( QFileDialog::AcceptSave );
 	dialog.setDefaultSuffix( "md" );
