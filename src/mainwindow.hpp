@@ -55,6 +55,8 @@ private slots:
     void onFileSave();
     void onFileSaveAs();
 	void onTextChanged();
+	void onAbout();
+	void onAboutQt();
 
 private:
     bool isModified() const;

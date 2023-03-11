@@ -102,7 +102,13 @@ struct MainWindowPrivate {
 			MainWindow::tr( "Save As" ), q, &MainWindow::onFileSaveAs );
 		fileMenu->addSeparator();
 		fileMenu->addAction( QIcon( QStringLiteral( ":/res/img/application-exit.png" ) ),
-			MainWindow::tr( "Quit" ), q, &QWidget::close );
+			MainWindow::tr( "Quit" ), MainWindow::tr( "Ctrl+Q" ), q, &QWidget::close );
+
+		auto helpMenu = q->menuBar()->addMenu( MainWindow::tr( "&Help" ) );
+		helpMenu->addAction( QIcon( QStringLiteral( ":/res/img/icon_24x24.png" ) ),
+			MainWindow::tr( "About" ), q, &MainWindow::onAbout );
+		helpMenu->addAction( QIcon( QStringLiteral( ":/res/img/qt.png" ) ),
+			MainWindow::tr( "About Qt" ), q, &MainWindow::onAboutQt );
 
 		QObject::connect( editor->document(), &QTextDocument::modificationChanged,
 			saveAction, &QAction::setEnabled );
@@ -325,6 +331,22 @@ MainWindow::onTextChanged()
 	d->mdDoc = parser.parse( stream, d->editor->docName() );
 
 	d->html->setText( MD::toHtml( d->mdDoc ) );
+}
+
+void
+MainWindow::onAbout()
+{
+	QMessageBox::about( this, tr( "About Markdown Editor" ),
+		tr( "Markdown Editor.\n\n"
+			"Author - Igor Mironchik (igor.mironchik at gmail dot com).\n\n"
+			"Copyright (c) 2023 Igor Mironchik.\n\n"
+			"Licensed under GNU GPL 3.0." ) );
+}
+
+void
+MainWindow::onAboutQt()
+{
+	QMessageBox::aboutQt( this );
 }
 
 } /* namespace MdEditor */
