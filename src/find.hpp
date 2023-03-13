@@ -23,7 +23,7 @@
 #pragma once
 
 // Qt include.
-#include <QWidget>
+#include <QFrame>
 #include <QScopedPointer>
 
 
@@ -37,7 +37,7 @@ struct FindPrivate;
 
 //! Find/replace widget.
 class Find
-	:	public QWidget
+	:	public QFrame
 {
 	Q_OBJECT
 
@@ -45,7 +45,9 @@ public:
 	explicit Find( QWidget * parent );
 	~Find() override;
 
-	QSize sizeHint() const override;
+private slots:
+	void findTextChanged( const QString & str );
+	void replaceTextChanged( const QString & str );
 
 private:
 	friend struct FindPrivate;

@@ -22,6 +22,7 @@
 
 // md-editor include.
 #include "find.hpp"
+#include "ui_find.h"
 
 
 namespace MdEditor {
@@ -38,9 +39,16 @@ struct FindPrivate {
 
 	void initUi()
 	{
+		ui.setupUi( q );
+
+		QObject::connect( ui.findEdit, &QLineEdit::textChanged,
+			q, &Find::findTextChanged );
+		QObject::connect( ui.replaceEdit, &QLineEdit::textChanged,
+			q, &Find::replaceTextChanged );
 	}
 
 	Find * q = nullptr;
+	Ui::Find ui;
 }; // struct FindPrivate
 
 
@@ -49,7 +57,7 @@ struct FindPrivate {
 //
 
 Find::Find( QWidget * parent )
-	:	QWidget( parent )
+	:	QFrame( parent )
 	,	d( new FindPrivate( this ) )
 {
 	d->initUi();
@@ -59,10 +67,18 @@ Find::~Find()
 {
 }
 
-QSize
-Find::sizeHint() const
+void
+Find::findTextChanged( const QString & str )
 {
-	return { 0, 60 };
+	d->ui.findNextBtn->setEnabled( !str.isEmpty() );
+	d->ui.findPrevBtn->setEnabled( !str.isEmpty() );
+}
+
+void
+Find::replaceTextChanged( const QString & str )
+{
+	d->ui.replaceBtn->setEnabled( !str.isEmpty() );
+	d->ui.replaceAllBtn->setEnabled( !str.isEmpty() );
 }
 
 } /* namespace MdEditor */
