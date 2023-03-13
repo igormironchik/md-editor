@@ -97,8 +97,10 @@ struct MainWindowPrivate {
 		channel->registerObject( QStringLiteral( "content" ), html );
 		page->setWebChannel( channel );
 
-		page->setHtml( q->htmlContent() );
+		baseUrl = QString( "file:%1/" ).arg(
+			QStandardPaths::standardLocations( QStandardPaths::HomeLocation ).first() );
 		editor->setDocName( QStringLiteral( "default.md" ) );
+		page->setHtml( q->htmlContent(), baseUrl );
 
 		q->setWindowTitle( MainWindow::tr( "%1[*] - Markdown Editor" ).arg( editor->docName() ) );
 
@@ -259,7 +261,8 @@ MainWindow::onFileNew()
 	d->editor->setPlainText( "" );
 	d->editor->document()->setModified( false );
 	setWindowTitle( MainWindow::tr( "%1[*] - Markdown Editor" ).arg( d->editor->docName() ) );
-	d->baseUrl = QString( "file:%1/" ).arg( QDir::currentPath() );
+	d->baseUrl = QString( "file:%1/" ).arg(
+		QStandardPaths::standardLocations( QStandardPaths::HomeLocation ).first() );
 	d->page->setHtml( htmlContent(), d->baseUrl );
 }
 
