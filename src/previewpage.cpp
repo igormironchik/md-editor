@@ -29,11 +29,16 @@
 
 namespace MdEditor {
 
+PreviewPage::PreviewPage( QObject * parent )
+	:	QWebEnginePage( parent )
+{
+}
+
 bool
 PreviewPage::acceptNavigationRequest( const QUrl & url,
 	QWebEnginePage::NavigationType /*type*/, bool /*isMainFrame*/ )
 {
-	if( url.scheme() == QStringLiteral( "qrc" ) )
+	if( url.scheme() == QStringLiteral( "qrc" ) || url.scheme() == QStringLiteral( "data" ) )
         return true;
 
 	QDesktopServices::openUrl( url );

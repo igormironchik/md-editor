@@ -35,13 +35,12 @@ namespace MdEditor {
 class PreviewPage
 	:	public QWebEnginePage
 {
-    Q_OBJECT
-
 public:
-    using QWebEnginePage::QWebEnginePage;
+	explicit PreviewPage( QObject * parent );
+	~PreviewPage() override = default;
 
 protected:
-    bool acceptNavigationRequest( const QUrl & url, NavigationType type,
+	bool acceptNavigationRequest( const QUrl & url, NavigationType type,
 		bool isMainFrame ) override;
 }; // class PreviewPage
 

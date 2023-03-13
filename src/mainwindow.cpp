@@ -88,7 +88,7 @@ struct MainWindowPrivate {
 
 		q->setCentralWidget( w );
 
-		page = new PreviewPage( q );
+		page = new PreviewPage( preview );
 		preview->setPage( page );
 
 		html = new HtmlDocument( q );
@@ -97,7 +97,7 @@ struct MainWindowPrivate {
 		channel->registerObject( QStringLiteral( "content" ), html );
 		page->setWebChannel( channel );
 
-		page->setHtml( q->htmlContent( "." ) );
+		page->setHtml( q->htmlContent() );
 		editor->setDocName( QStringLiteral( "default.md" ) );
 
 		q->setWindowTitle( MainWindow::tr( "%1[*] - Markdown Editor" ).arg( editor->docName() ) );
@@ -181,6 +181,7 @@ struct MainWindowPrivate {
 	bool init = false;
 	std::shared_ptr< MD::Document< MD::QStringTrait > > mdDoc;
 	QString mdCss;
+	QString baseUrl;
 }; // struct MainWindowPrivate
 
 
@@ -225,8 +226,10 @@ MainWindow::openFile( const QString & path )
 		return;
 	}
 
-	d->page->setHtml( htmlContent( QFileInfo( path ).absoluteDir().absolutePath() ) );
 	d->editor->setDocName( path );
+	d->baseUrl = QString( "file:%1/" ).arg( QFileInfo( path ).absoluteDir().absolutePath() );
+	d->page->setHtml( htmlContent(), d->baseUrl );
+
 	d->editor->setPlainText( f.readAll() );
 	f.close();
 	setWindowTitle( MainWindow::tr( "%1[*] - Markdown Editor" )
@@ -253,10 +256,11 @@ MainWindow::onFileNew()
 	}
 
 	d->editor->setDocName( QStringLiteral( "default.md" ) );
-	d->page->setHtml( htmlContent( "." ) );
 	d->editor->setPlainText( "" );
 	d->editor->document()->setModified( false );
 	setWindowTitle( MainWindow::tr( "%1[*] - Markdown Editor" ).arg( d->editor->docName() ) );
+	d->baseUrl = QString( "file:%1/" ).arg( QDir::currentPath() );
+	d->page->setHtml( htmlContent(), d->baseUrl );
 }
 
 void
@@ -302,6 +306,7 @@ MainWindow::onFileSave()
 
 	QTextStream str( &f );
 	str << d->editor->toPlainText();
+	f.close();
 
 	d->editor->document()->setModified( false );
 
@@ -322,10 +327,12 @@ MainWindow::onFileSaveAs()
 		return;
 
 	d->editor->setDocName( dialog.selectedFiles().constFirst() );
-	d->page->setHtml( htmlContent( QFileInfo( d->editor->docName() )
-		.absoluteDir().absolutePath() ) );
+	d->baseUrl = QString( "file:%1/" ).arg( QFileInfo( d->editor->docName() )
+		.absoluteDir().absolutePath() );
 
 	onFileSave();
+
+	d->page->setHtml( htmlContent(), d->baseUrl );
 }
 
 void
@@ -343,19 +350,18 @@ MainWindow::closeEvent( QCloseEvent * e )
 }
 
 QString
-MainWindow::htmlContent( const QString & baseUrl ) const
+MainWindow::htmlContent() const
 {
 	return QStringLiteral( "<!doctype html>\n"
 		"<meta charset=\"utf-8\">\n"
 		"<head>\n"
 		"  <script src=\"qrc:/qtwebchannel/qwebchannel.js\"></script>\n"
 		"  <style>\n"
-		"  %2\n"
+		"  %1\n"
 		"  </style>\n"
 		"</head>\n"
 		"<body>\n"
-		"  <base href=\"%1\" />\n"
-		"  <div id=\"placeholder\" class=\"markdown-body\"></div>\n"
+		"  <div id=\"placeholder\"></div>\n"
 		"  <script>\n"
 		"  'use strict';\n"
 		"\n"
@@ -375,7 +381,7 @@ MainWindow::htmlContent( const QString & baseUrl ) const
 		"  </script>\n"
 		"</body>\n"
 		"</html>" )
-			.arg( baseUrl, d->mdCss );
+			.arg( d->mdCss );
 }
 
 void
@@ -387,7 +393,7 @@ MainWindow::onTextChanged()
 	MD::Parser< MD::QStringTrait > parser;
 	d->mdDoc = parser.parse( stream, d->editor->docName() );
 
-	d->html->setText( MD::toHtml( d->mdDoc ) );
+	d->html->setText( MD::toHtml( d->mdDoc, false ) );
 }
 
 void

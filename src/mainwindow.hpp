@@ -62,7 +62,7 @@ private slots:
 private:
     bool isModified() const;
 	void openFile( const QString & path );
-	QString htmlContent( const QString & baseUrl ) const;
+	QString htmlContent() const;
 
 private:
 	Q_DISABLE_COPY( MainWindow )
