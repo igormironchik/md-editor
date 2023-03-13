@@ -17,7 +17,9 @@ set( SRC main.cpp
 	previewpage.hpp
 	previewpage.cpp
 	htmldocument.hpp
-	htmldocument.cpp )
+	htmldocument.cpp
+	find.hpp
+	find.cpp )
 
 qt6_add_resources( SRC resources.qrc )
 

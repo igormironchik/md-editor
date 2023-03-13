@@ -26,6 +26,7 @@
 #include "webview.hpp"
 #include "previewpage.hpp"
 #include "htmldocument.hpp"
+#include "find.hpp"
 
 // Qt include.
 #include <QSplitter>
@@ -43,6 +44,7 @@
 #include <QDir>
 #include <QToolTip>
 #include <QStandardPaths>
+#include <QVBoxLayout>
 
 // md4qt include.
 #define MD4QT_QT_SUPPORT
@@ -68,10 +70,18 @@ struct MainWindowPrivate {
 		auto w = new QWidget( q );
 		auto l = new QHBoxLayout( w );
 		splitter = new QSplitter( Qt::Horizontal, w );
-		editor = new Editor( w );
+		auto ew = new QWidget( w );
+		auto v = new QVBoxLayout( ew );
+		v->setContentsMargins( 0, 0, 0, 0 );
+		v->setSpacing( 0 );
+		editor = new Editor( ew );
+		find = new Find( ew );
+		v->addWidget( editor );
+		v->addWidget( find );
 		preview = new WebView( w );
+		find->hide();
 
-		splitter->addWidget( editor );
+		splitter->addWidget( ew );
 		splitter->addWidget( preview );
 
 		l->addWidget( splitter );
@@ -105,6 +115,15 @@ struct MainWindowPrivate {
 		fileMenu->addSeparator();
 		fileMenu->addAction( QIcon( QStringLiteral( ":/res/img/application-exit.png" ) ),
 			MainWindow::tr( "Quit" ), MainWindow::tr( "Ctrl+Q" ), q, &QWidget::close );
+
+		auto editMenu = q->menuBar()->addMenu( MainWindow::tr( "&Edit" ) );
+		auto toggleFindAction = new QAction(
+			QIcon( QStringLiteral( ":/res/img/edit-find.png" ) ),
+			MainWindow::tr( "Find/Replace" ), q );
+		toggleFindAction->setCheckable( true );
+		toggleFindAction->setShortcut( MainWindow::tr( "Ctrl+F" ) );
+		toggleFindAction->setChecked( false );
+		editMenu->addAction( toggleFindAction );
 
 		auto settingsMenu = q->menuBar()->addMenu( MainWindow::tr( "&Settings" ) );
 		auto toggleLineNumbersAction = new QAction(
@@ -144,6 +163,8 @@ struct MainWindowPrivate {
 			editor, &Editor::showLineNumbers );
 		QObject::connect( toggleUnprintableCharacters, &QAction::toggled,
 			editor, &Editor::showUnprintableCharacters );
+		QObject::connect( toggleFindAction, &QAction::toggled,
+			find, &QWidget::setVisible );
 	}
 
 	MainWindow * q = nullptr;
@@ -152,6 +173,7 @@ struct MainWindowPrivate {
 	PreviewPage * page = nullptr;
 	QSplitter * splitter = nullptr;
 	HtmlDocument * html = nullptr;
+	Find * find = nullptr;
 	QAction * newAction = nullptr;
 	QAction * openAction = nullptr;
 	QAction * saveAction = nullptr;
