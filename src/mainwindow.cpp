@@ -124,9 +124,7 @@ struct MainWindowPrivate {
 		auto toggleFindAction = new QAction(
 			QIcon( QStringLiteral( ":/res/img/edit-find.png" ) ),
 			MainWindow::tr( "Find/Replace" ), q );
-		toggleFindAction->setCheckable( true );
 		toggleFindAction->setShortcut( MainWindow::tr( "Ctrl+F" ) );
-		toggleFindAction->setChecked( false );
 		editMenu->addAction( toggleFindAction );
 
 		auto settingsMenu = q->menuBar()->addMenu( MainWindow::tr( "&Settings" ) );
@@ -167,7 +165,7 @@ struct MainWindowPrivate {
 			editor, &Editor::showLineNumbers );
 		QObject::connect( toggleUnprintableCharacters, &QAction::toggled,
 			editor, &Editor::showUnprintableCharacters );
-		QObject::connect( toggleFindAction, &QAction::toggled,
+		QObject::connect( toggleFindAction, &QAction::triggered,
 			q, &MainWindow::onFind );
 		QObject::connect( page, &QWebEnginePage::linkHovered,
 			[this]( const QString & url )
