@@ -25,6 +25,7 @@
 
 // Qt include.
 #include <QDesktopServices>
+#include <QWebEngineSettings>
 
 
 namespace MdEditor {
@@ -32,6 +33,7 @@ namespace MdEditor {
 PreviewPage::PreviewPage( QObject * parent )
 	:	QWebEnginePage( parent )
 {
+	settings()->setAttribute( QWebEngineSettings::LocalContentCanAccessRemoteUrls, true );
 }
 
 bool

@@ -46,6 +46,7 @@
 #include <QStandardPaths>
 #include <QVBoxLayout>
 #include <QTextDocumentFragment>
+#include <QStatusBar>
 
 // md4qt include.
 #define MD4QT_QT_SUPPORT
@@ -168,6 +169,14 @@ struct MainWindowPrivate {
 			editor, &Editor::showUnprintableCharacters );
 		QObject::connect( toggleFindAction, &QAction::toggled,
 			q, &MainWindow::onFind );
+		QObject::connect( page, &QWebEnginePage::linkHovered,
+			[this]( const QString & url )
+			{
+				if( !url.isEmpty() )
+					this->q->statusBar()->showMessage( url );
+				else
+					this->q->statusBar()->clearMessage();
+			} );
 	}
 
 	MainWindow * q = nullptr;
