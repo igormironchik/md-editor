@@ -45,6 +45,7 @@
 #include <QToolTip>
 #include <QStandardPaths>
 #include <QVBoxLayout>
+#include <QTextDocumentFragment>
 
 // md4qt include.
 #define MD4QT_QT_SUPPORT
@@ -75,7 +76,7 @@ struct MainWindowPrivate {
 		v->setContentsMargins( 0, 0, 0, 0 );
 		v->setSpacing( 0 );
 		editor = new Editor( ew );
-		find = new Find( ew );
+		find = new Find( editor, ew );
 		v->addWidget( editor );
 		v->addWidget( find );
 		preview = new WebView( w );
@@ -166,7 +167,7 @@ struct MainWindowPrivate {
 		QObject::connect( toggleUnprintableCharacters, &QAction::toggled,
 			editor, &Editor::showUnprintableCharacters );
 		QObject::connect( toggleFindAction, &QAction::toggled,
-			find, &QWidget::setVisible );
+			q, &MainWindow::onFind );
 	}
 
 	MainWindow * q = nullptr;
@@ -350,6 +351,32 @@ MainWindow::closeEvent( QCloseEvent * e )
 		if( button != QMessageBox::Yes )
 			e->ignore();
 	}
+}
+
+bool
+MainWindow::event( QEvent * event )
+{
+	switch( event->type() )
+	{
+		case QEvent::ShortcutOverride :
+		{
+			if( static_cast< QKeyEvent* >( event )->key() == Qt::Key_Escape )
+			{
+				event->accept();
+
+				d->find->hide();
+				d->editor->setFocus();
+
+				return true;
+			}
+		}
+			break;
+
+		default :
+			break;
+	}
+
+	return QMainWindow::event( event );
 }
 
 QString
@@ -536,6 +563,15 @@ MainWindow::onLineHovered( int lineNumber, const QPoint & pos )
 			}
 		}
 	}
+}
+
+void
+MainWindow::onFind( bool )
+{
+	if( !d->find->isVisible() )
+		d->find->show();
+
+	d->find->setFindText( d->editor->textCursor().selection().toPlainText() );
 }
 
 } /* namespace MdEditor */

@@ -59,6 +59,8 @@ struct EditorPrivate {
 	LineNumberArea * lineNumberArea = nullptr;
 	QString docName;
 	bool showLineNumberArea = true;
+	QList< QTextEdit::ExtraSelection > extraSelections;
+	QTextEdit::ExtraSelection currentLine;
 }; // struct EditorPrivate
 
 
@@ -143,19 +145,17 @@ Editor::resizeEvent( QResizeEvent * e )
 void
 Editor::highlightCurrentLine()
 {
-	QList< QTextEdit::ExtraSelection > extraSelections;
+	static const QColor lineColor = QColor( Qt::yellow ).lighter( 180 );
 
-	QTextEdit::ExtraSelection selection;
+	d->currentLine.format.setBackground( lineColor );
+	d->currentLine.format.setProperty( QTextFormat::FullWidthSelection, true );
+	d->currentLine.cursor = textCursor();
+	d->currentLine.cursor.clearSelection();
 
-	static const QColor lineColor = QColor( Qt::yellow ).lighter( 160 );
+	QList< QTextEdit::ExtraSelection > tmp = d->extraSelections;
+	tmp.prepend( d->currentLine );
 
-	selection.format.setBackground( lineColor );
-	selection.format.setProperty( QTextFormat::FullWidthSelection, true );
-	selection.cursor = textCursor();
-	selection.cursor.clearSelection();
-	extraSelections.append( selection );
-
-	setExtraSelections( extraSelections );
+	setExtraSelections( tmp );
 }
 
 void
@@ -296,6 +296,48 @@ Editor::showLineNumbers( bool on )
 	}
 
 	updateLineNumberAreaWidth( 0 );
+}
+
+void
+Editor::highlight( const QString & text )
+{
+	d->extraSelections.clear();
+
+	if( !text.isEmpty() )
+	{
+		QTextCursor c( document() );
+
+		static const QColor color = QColor( Qt::yellow );
+
+		while( !c.isNull() )
+		{
+			QTextEdit::ExtraSelection s;
+
+			s.format.setBackground( color );
+			s.cursor = document()->find( text, c, QTextDocument::FindCaseSensitively );
+
+			if( !s.cursor.isNull() )
+				d->extraSelections.append( s );
+
+			c = s.cursor;
+		}
+	}
+
+	QList< QTextEdit::ExtraSelection > tmp = d->extraSelections;
+	tmp.prepend( d->currentLine );
+
+	setExtraSelections( tmp );
+}
+
+void
+Editor::onFindNext()
+{
+	qDebug() << "next";
+}
+
+void
+Editor::onFindPrev()
+{
 }
 
 } /* namespace MdEditor */

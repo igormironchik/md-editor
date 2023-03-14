@@ -48,6 +48,7 @@ public:
 protected:
 	void resizeEvent( QResizeEvent * e ) override;
     void closeEvent( QCloseEvent * e ) override;
+	bool event( QEvent * event ) override;
 
 private slots:
     void onFileNew();
@@ -58,6 +59,7 @@ private slots:
 	void onAbout();
 	void onAboutQt();
 	void onLineHovered( int lineNumber, const QPoint & pos );
+	void onFind( bool on );
 
 private:
     bool isModified() const;

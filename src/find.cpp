@@ -23,6 +23,7 @@
 // md-editor include.
 #include "find.hpp"
 #include "ui_find.h"
+#include "editor.hpp"
 
 
 namespace MdEditor {
@@ -32,8 +33,9 @@ namespace MdEditor {
 //
 
 struct FindPrivate {
-	FindPrivate( Find * parent )
+	FindPrivate( Editor * e, Find * parent )
 		:	q( parent )
+		,	editor( e )
 	{
 	}
 
@@ -45,9 +47,29 @@ struct FindPrivate {
 			q, &Find::findTextChanged );
 		QObject::connect( ui.replaceEdit, &QLineEdit::textChanged,
 			q, &Find::replaceTextChanged );
+
+		auto findPrevAction = new QAction( Find::tr( "Find Previous" ), q );
+		findPrevAction->setShortcutContext( Qt::ApplicationShortcut );
+		findPrevAction->setShortcut( Find::tr( "Shifgt+F3" ) );
+		findPrevAction->setToolTip( Find::tr( "Find Previous <small>Shift+F3</small>" ) );
+		ui.findPrevBtn->setDefaultAction( findPrevAction );
+		ui.findPrevBtn->setEnabled( false );
+
+		auto findNextAction = new QAction( Find::tr( "Find Next" ), q );
+		findNextAction->setShortcutContext( Qt::ApplicationShortcut );
+		findNextAction->setShortcut( Find::tr( "F3" ) );
+		findNextAction->setToolTip( Find::tr( "Find Next <small>F3</small>" ) );
+		ui.findNextBtn->setDefaultAction( findNextAction );
+		ui.findNextBtn->setEnabled( false );
+
+		QObject::connect( findPrevAction, &QAction::triggered,
+			editor, &Editor::onFindPrev );
+		QObject::connect( findNextAction, &QAction::triggered,
+			editor, &Editor::onFindNext );
 	}
 
 	Find * q = nullptr;
+	Editor * editor = nullptr;
 	Ui::Find ui;
 }; // struct FindPrivate
 
@@ -56,9 +78,9 @@ struct FindPrivate {
 // Find
 //
 
-Find::Find( QWidget * parent )
+Find::Find( Editor * editor, QWidget * parent )
 	:	QFrame( parent )
-	,	d( new FindPrivate( this ) )
+	,	d( new FindPrivate( editor, this ) )
 {
 	d->initUi();
 }
@@ -72,6 +94,10 @@ Find::findTextChanged( const QString & str )
 {
 	d->ui.findNextBtn->setEnabled( !str.isEmpty() );
 	d->ui.findPrevBtn->setEnabled( !str.isEmpty() );
+	d->ui.findNextBtn->defaultAction()->setEnabled( !str.isEmpty() );
+	d->ui.findPrevBtn->defaultAction()->setEnabled( !str.isEmpty() );
+
+	d->editor->highlight( d->ui.findEdit->text() );
 }
 
 void
@@ -79,6 +105,16 @@ Find::replaceTextChanged( const QString & str )
 {
 	d->ui.replaceBtn->setEnabled( !str.isEmpty() );
 	d->ui.replaceAllBtn->setEnabled( !str.isEmpty() );
+}
+
+void
+Find::setFindText( const QString & text )
+{
+	d->ui.findEdit->setText( text );
+	d->ui.findEdit->setFocus();
+	d->ui.findEdit->selectAll();
+
+	d->editor->highlight( text );
 }
 
 } /* namespace MdEditor */

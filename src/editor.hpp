@@ -58,11 +58,14 @@ public:
 public slots:
 	void showUnprintableCharacters( bool on );
 	void showLineNumbers( bool on );
+	void highlight( const QString & text );
 
 private slots:
 	void updateLineNumberAreaWidth( int newBlockCount );
 	void highlightCurrentLine();
 	void updateLineNumberArea( const QRect & rect, int dy );
+	void onFindNext();
+	void onFindPrev();
 
 protected:
 	void resizeEvent( QResizeEvent * event ) override;
@@ -73,6 +76,7 @@ protected:
 private:
 	friend struct EditorPrivate;
 	friend class LineNumberArea;
+	friend class FindPrivate;
 
 	Q_DISABLE_COPY( Editor )
 
