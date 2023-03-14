@@ -61,6 +61,7 @@ struct EditorPrivate {
 	bool showLineNumberArea = true;
 	QList< QTextEdit::ExtraSelection > extraSelections;
 	QTextEdit::ExtraSelection currentLine;
+	int currentSelectionIdx = -1;
 }; // struct EditorPrivate
 
 
@@ -301,7 +302,10 @@ Editor::showLineNumbers( bool on )
 void
 Editor::highlight( const QString & text )
 {
+	const auto tmp = textCursor();
+
 	d->extraSelections.clear();
+	d->currentSelectionIdx = -1;
 
 	if( !text.isEmpty() )
 	{
@@ -317,27 +321,76 @@ Editor::highlight( const QString & text )
 			s.cursor = document()->find( text, c, QTextDocument::FindCaseSensitively );
 
 			if( !s.cursor.isNull() )
+			{
 				d->extraSelections.append( s );
+
+				if( s.cursor.selectionStart() == tmp.selectionStart() &&
+					s.cursor.selectionEnd() == tmp.selectionEnd() )
+						d->currentSelectionIdx = d->extraSelections.size() - 1;
+			}
 
 			c = s.cursor;
 		}
 	}
 
-	QList< QTextEdit::ExtraSelection > tmp = d->extraSelections;
-	tmp.prepend( d->currentLine );
+	QList< QTextEdit::ExtraSelection > s = d->extraSelections;
+	s.prepend( d->currentLine );
 
-	setExtraSelections( tmp );
+	setExtraSelections( s );
 }
 
 void
 Editor::onFindNext()
 {
-	qDebug() << "next";
+	if( !d->extraSelections.isEmpty() )
+	{
+		if( d->currentSelectionIdx == -1 )
+			d->currentSelectionIdx = 0;
+		else
+			++d->currentSelectionIdx;
+
+		if( d->currentSelectionIdx == d->extraSelections.size() )
+			d->currentSelectionIdx = 0;
+
+		auto s = d->extraSelections[ d->currentSelectionIdx ].cursor;
+		auto c = textCursor();
+		c.setPosition( s.selectionStart() );
+		c.setPosition( s.selectionEnd(), QTextCursor::KeepAnchor );
+		setTextCursor( c );
+	}
 }
 
 void
 Editor::onFindPrev()
 {
+	if( !d->extraSelections.isEmpty() )
+	{
+		if( d->currentSelectionIdx == -1 )
+			d->currentSelectionIdx = d->extraSelections.size() - 1;
+		else
+			--d->currentSelectionIdx;
+
+		if( d->currentSelectionIdx == -1 )
+			d->currentSelectionIdx = d->extraSelections.size() - 1;
+
+		auto s = d->extraSelections[ d->currentSelectionIdx ].cursor;
+		auto c = textCursor();
+		c.setPosition( s.selectionStart() );
+		c.setPosition( s.selectionEnd(), QTextCursor::KeepAnchor );
+		setTextCursor( c );
+	}
+}
+
+void
+Editor::clearExtraSelections()
+{
+	d->extraSelections.clear();
+	d->currentSelectionIdx = -1;
+
+	QList< QTextEdit::ExtraSelection > s = d->extraSelections;
+	s.prepend( d->currentLine );
+
+	setExtraSelections( s );
 }
 
 } /* namespace MdEditor */

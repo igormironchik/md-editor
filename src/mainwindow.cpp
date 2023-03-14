@@ -366,6 +366,7 @@ MainWindow::event( QEvent * event )
 
 				d->find->hide();
 				d->editor->setFocus();
+				d->editor->clearExtraSelections();
 
 				return true;
 			}

@@ -50,7 +50,7 @@ struct FindPrivate {
 
 		auto findPrevAction = new QAction( Find::tr( "Find Previous" ), q );
 		findPrevAction->setShortcutContext( Qt::ApplicationShortcut );
-		findPrevAction->setShortcut( Find::tr( "Shifgt+F3" ) );
+		findPrevAction->setShortcut( Find::tr( "Shift+F3" ) );
 		findPrevAction->setToolTip( Find::tr( "Find Previous <small>Shift+F3</small>" ) );
 		ui.findPrevBtn->setDefaultAction( findPrevAction );
 		ui.findPrevBtn->setEnabled( false );

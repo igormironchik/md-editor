@@ -59,6 +59,7 @@ public slots:
 	void showUnprintableCharacters( bool on );
 	void showLineNumbers( bool on );
 	void highlight( const QString & text );
+	void clearExtraSelections();
 
 private slots:
 	void updateLineNumberAreaWidth( int newBlockCount );
