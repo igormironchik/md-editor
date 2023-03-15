@@ -443,8 +443,10 @@ Editor::replaceCurrent( const QString & with )
 	if( foundSelected() )
 	{
 		auto c = textCursor();
+		c.beginEditBlock();
 		c.removeSelectedText();
 		c.insertText( with );
+		c.endEditBlock();
 
 		highlight( d->highlightedTex );
 	}
