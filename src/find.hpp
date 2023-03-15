@@ -52,6 +52,8 @@ public slots:
 private slots:
 	void findTextChanged( const QString & str );
 	void replaceTextChanged( const QString & str );
+	void onReplace();
+	void onSelectionChanged();
 
 private:
 	friend struct FindPrivate;

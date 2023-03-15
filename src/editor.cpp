@@ -61,7 +61,7 @@ struct EditorPrivate {
 	bool showLineNumberArea = true;
 	QList< QTextEdit::ExtraSelection > extraSelections;
 	QTextEdit::ExtraSelection currentLine;
-	int currentSelectionIdx = -1;
+	QString highlightedTex;
 }; // struct EditorPrivate
 
 
@@ -78,6 +78,33 @@ Editor::Editor( QWidget * parent )
 
 Editor::~Editor()
 {
+}
+
+bool
+Editor::foundHighlighted() const
+{
+	return !d->extraSelections.isEmpty();
+}
+
+bool
+Editor::foundSelected() const
+{
+	const auto c = textCursor();
+
+	for( const auto & s : qAsConst( d->extraSelections ) )
+	{
+		if( c.position() == s.cursor.position() )
+		{
+			if( c.hasSelection() &&
+				c.selectionStart() == s.cursor.selectionStart() &&
+				c.selectionEnd() == s.cursor.selectionEnd() )
+					return true;
+			else
+				return false;
+		}
+	}
+
+	return false;
 }
 
 void
@@ -302,10 +329,9 @@ Editor::showLineNumbers( bool on )
 void
 Editor::highlight( const QString & text )
 {
-	const auto tmp = textCursor();
+	d->highlightedTex = text;
 
 	d->extraSelections.clear();
-	d->currentSelectionIdx = -1;
 
 	if( !text.isEmpty() )
 	{
@@ -321,13 +347,7 @@ Editor::highlight( const QString & text )
 			s.cursor = document()->find( text, c, QTextDocument::FindCaseSensitively );
 
 			if( !s.cursor.isNull() )
-			{
 				d->extraSelections.append( s );
-
-				if( s.cursor.selectionStart() == tmp.selectionStart() &&
-					s.cursor.selectionEnd() == tmp.selectionEnd() )
-						d->currentSelectionIdx = d->extraSelections.size() - 1;
-			}
 
 			c = s.cursor;
 		}
@@ -344,19 +364,31 @@ Editor::onFindNext()
 {
 	if( !d->extraSelections.isEmpty() )
 	{
-		if( d->currentSelectionIdx == -1 )
-			d->currentSelectionIdx = 0;
-		else
-			++d->currentSelectionIdx;
-
-		if( d->currentSelectionIdx == d->extraSelections.size() )
-			d->currentSelectionIdx = 0;
-
-		auto s = d->extraSelections[ d->currentSelectionIdx ].cursor;
 		auto c = textCursor();
-		c.setPosition( s.selectionStart() );
-		c.setPosition( s.selectionEnd(), QTextCursor::KeepAnchor );
-		setTextCursor( c );
+		bool setToFirst = true;
+
+		for( const auto & s : qAsConst( d->extraSelections ) )
+		{
+			if( c.position() < s.cursor.position() )
+			{
+				c.setPosition( s.cursor.selectionStart() );
+				c.setPosition( s.cursor.selectionEnd(), QTextCursor::KeepAnchor );
+				setTextCursor( c );
+
+				setToFirst = false;
+
+				break;
+			}
+		}
+
+		if( setToFirst )
+		{
+			auto s = d->extraSelections.at( 0 ).cursor;
+			auto c = textCursor();
+			c.setPosition( s.selectionStart() );
+			c.setPosition( s.selectionEnd(), QTextCursor::KeepAnchor );
+			setTextCursor( c );
+		}
 	}
 }
 
@@ -365,19 +397,32 @@ Editor::onFindPrev()
 {
 	if( !d->extraSelections.isEmpty() )
 	{
-		if( d->currentSelectionIdx == -1 )
-			d->currentSelectionIdx = d->extraSelections.size() - 1;
-		else
-			--d->currentSelectionIdx;
-
-		if( d->currentSelectionIdx == -1 )
-			d->currentSelectionIdx = d->extraSelections.size() - 1;
-
-		auto s = d->extraSelections[ d->currentSelectionIdx ].cursor;
 		auto c = textCursor();
-		c.setPosition( s.selectionStart() );
-		c.setPosition( s.selectionEnd(), QTextCursor::KeepAnchor );
-		setTextCursor( c );
+		bool setToLast = true;
+
+		for( auto it = d->extraSelections.crbegin(), last = d->extraSelections.crend();
+			it != last; ++it )
+		{
+			if( c.position() > it->cursor.position() )
+			{
+				c.setPosition( it->cursor.selectionStart() );
+				c.setPosition( it->cursor.selectionEnd(), QTextCursor::KeepAnchor );
+				setTextCursor( c );
+
+				setToLast = false;
+
+				break;
+			}
+		}
+
+		if( setToLast )
+		{
+			auto s = d->extraSelections.at( d->extraSelections.size() - 1 ).cursor;
+			auto c = textCursor();
+			c.setPosition( s.selectionStart() );
+			c.setPosition( s.selectionEnd(), QTextCursor::KeepAnchor );
+			setTextCursor( c );
+		}
 	}
 }
 
@@ -385,12 +430,24 @@ void
 Editor::clearExtraSelections()
 {
 	d->extraSelections.clear();
-	d->currentSelectionIdx = -1;
 
 	QList< QTextEdit::ExtraSelection > s = d->extraSelections;
 	s.prepend( d->currentLine );
 
 	setExtraSelections( s );
+}
+
+void
+Editor::replaceCurrent( const QString & with )
+{
+	if( foundSelected() )
+	{
+		auto c = textCursor();
+		c.removeSelectedText();
+		c.insertText( with );
+
+		highlight( d->highlightedTex );
+	}
 }
 
 } /* namespace MdEditor */

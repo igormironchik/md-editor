@@ -62,10 +62,19 @@ struct FindPrivate {
 		ui.findNextBtn->setDefaultAction( findNextAction );
 		ui.findNextBtn->setEnabled( false );
 
+		auto replaceAction = new QAction( Find::tr( "Replace" ), q );
+		replaceAction->setToolTip( Find::tr( "Replace Selected" ) );
+		ui.replaceBtn->setDefaultAction( replaceAction );
+		ui.replaceBtn->setEnabled( false );
+
 		QObject::connect( findPrevAction, &QAction::triggered,
 			editor, &Editor::onFindPrev );
 		QObject::connect( findNextAction, &QAction::triggered,
 			editor, &Editor::onFindNext );
+		QObject::connect( replaceAction, &QAction::triggered,
+			q, &Find::onReplace );
+		QObject::connect( editor, &QPlainTextEdit::selectionChanged,
+			q, &Find::onSelectionChanged );
 	}
 
 	Find * q = nullptr;
@@ -101,10 +110,9 @@ Find::findTextChanged( const QString & str )
 }
 
 void
-Find::replaceTextChanged( const QString & str )
+Find::replaceTextChanged( const QString & )
 {
-	d->ui.replaceBtn->setEnabled( !str.isEmpty() );
-	d->ui.replaceAllBtn->setEnabled( !str.isEmpty() );
+	onSelectionChanged();
 }
 
 void
@@ -115,6 +123,19 @@ Find::setFindText( const QString & text )
 	d->ui.findEdit->selectAll();
 
 	d->editor->highlight( text );
+}
+
+void
+Find::onReplace()
+{
+	d->editor->replaceCurrent( d->ui.replaceEdit->text() );
+}
+
+void
+Find::onSelectionChanged()
+{
+	d->ui.replaceBtn->setEnabled( d->editor->foundSelected() );
+	d->ui.replaceAllBtn->setEnabled( d->editor->foundHighlighted() );
 }
 
 } /* namespace MdEditor */

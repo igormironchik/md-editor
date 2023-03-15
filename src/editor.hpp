@@ -54,12 +54,15 @@ public:
 
 	void lineNumberAreaPaintEvent( QPaintEvent * event );
 	int lineNumberAreaWidth();
+	bool foundHighlighted() const;
+	bool foundSelected() const;
 
 public slots:
 	void showUnprintableCharacters( bool on );
 	void showLineNumbers( bool on );
 	void highlight( const QString & text );
 	void clearExtraSelections();
+	void replaceCurrent( const QString & with );
 
 private slots:
 	void updateLineNumberAreaWidth( int newBlockCount );
