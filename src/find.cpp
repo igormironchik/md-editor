@@ -44,9 +44,9 @@ struct FindPrivate {
 		ui.setupUi( q );
 
 		QObject::connect( ui.findEdit, &QLineEdit::textChanged,
-			q, &Find::findTextChanged );
+			q, &Find::onFindTextChanged );
 		QObject::connect( ui.replaceEdit, &QLineEdit::textChanged,
-			q, &Find::replaceTextChanged );
+			q, &Find::onReplaceTextChanged );
 
 		auto findPrevAction = new QAction( Find::tr( "Find Previous" ), q );
 		findPrevAction->setShortcutContext( Qt::ApplicationShortcut );
@@ -67,12 +67,19 @@ struct FindPrivate {
 		ui.replaceBtn->setDefaultAction( replaceAction );
 		ui.replaceBtn->setEnabled( false );
 
+		auto replaceAllAction = new QAction( Find::tr( "Replace All" ), q );
+		replaceAllAction->setToolTip( Find::tr( "Replace All" ) );
+		ui.replaceAllBtn->setDefaultAction( replaceAllAction );
+		ui.replaceAllBtn->setEnabled( false );
+
 		QObject::connect( findPrevAction, &QAction::triggered,
 			editor, &Editor::onFindPrev );
 		QObject::connect( findNextAction, &QAction::triggered,
 			editor, &Editor::onFindNext );
 		QObject::connect( replaceAction, &QAction::triggered,
 			q, &Find::onReplace );
+		QObject::connect( replaceAllAction, &QAction::triggered,
+			q, &Find::onReplaceAll );
 		QObject::connect( editor, &QPlainTextEdit::selectionChanged,
 			q, &Find::onSelectionChanged );
 	}
@@ -99,7 +106,7 @@ Find::~Find()
 }
 
 void
-Find::findTextChanged( const QString & str )
+Find::onFindTextChanged( const QString & str )
 {
 	d->ui.findNextBtn->setEnabled( !str.isEmpty() );
 	d->ui.findPrevBtn->setEnabled( !str.isEmpty() );
@@ -110,7 +117,7 @@ Find::findTextChanged( const QString & str )
 }
 
 void
-Find::replaceTextChanged( const QString & )
+Find::onReplaceTextChanged( const QString & )
 {
 	onSelectionChanged();
 }
@@ -123,6 +130,8 @@ Find::setFindText( const QString & text )
 	d->ui.findEdit->selectAll();
 
 	d->editor->highlight( text );
+
+	onSelectionChanged();
 }
 
 void
@@ -132,10 +141,18 @@ Find::onReplace()
 }
 
 void
+Find::onReplaceAll()
+{
+	d->editor->replaceAll( d->ui.replaceEdit->text() );
+}
+
+void
 Find::onSelectionChanged()
 {
-	d->ui.replaceBtn->setEnabled( d->editor->foundSelected() );
-	d->ui.replaceAllBtn->setEnabled( d->editor->foundHighlighted() );
+	d->ui.replaceBtn->setEnabled( d->editor->foundSelected() &&
+		!d->ui.replaceEdit->text().isEmpty() );
+	d->ui.replaceAllBtn->setEnabled( d->editor->foundHighlighted() &&
+		!d->ui.replaceEdit->text().isEmpty() );
 }
 
 } /* namespace MdEditor */

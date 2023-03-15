@@ -373,7 +373,7 @@ MainWindow::event( QEvent * event )
 
 				d->find->hide();
 				d->editor->setFocus();
-				d->editor->clearExtraSelections();
+				d->editor->highlight( QString() );
 
 				return true;
 			}

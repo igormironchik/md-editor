@@ -63,6 +63,7 @@ public slots:
 	void highlight( const QString & text );
 	void clearExtraSelections();
 	void replaceCurrent( const QString & with );
+	void replaceAll( const QString & with );
 
 private slots:
 	void updateLineNumberAreaWidth( int newBlockCount );
@@ -70,6 +71,7 @@ private slots:
 	void updateLineNumberArea( const QRect & rect, int dy );
 	void onFindNext();
 	void onFindPrev();
+	void onContentChanged();
 
 protected:
 	void resizeEvent( QResizeEvent * event ) override;

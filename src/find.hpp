@@ -50,9 +50,10 @@ public slots:
 	void setFindText( const QString & text );
 
 private slots:
-	void findTextChanged( const QString & str );
-	void replaceTextChanged( const QString & str );
+	void onFindTextChanged( const QString & str );
+	void onReplaceTextChanged( const QString & str );
 	void onReplace();
+	void onReplaceAll();
 	void onSelectionChanged();
 
 private:

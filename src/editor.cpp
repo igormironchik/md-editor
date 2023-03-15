@@ -47,6 +47,8 @@ struct EditorPrivate {
 
 		QObject::connect( q, &Editor::cursorPositionChanged,
 			q, &Editor::highlightCurrentLine );
+		QObject::connect( q->document(), &QTextDocument::contentsChanged,
+			q, &Editor::onContentChanged );
 
 		q->showLineNumbers( true );
 		q->setFont( QFontDatabase::systemFont( QFontDatabase::FixedFont ) );
@@ -447,9 +449,51 @@ Editor::replaceCurrent( const QString & with )
 		c.removeSelectedText();
 		c.insertText( with );
 		c.endEditBlock();
-
-		highlight( d->highlightedTex );
 	}
+}
+
+void
+Editor::replaceAll( const QString & with )
+{
+	if( foundHighlighted() )
+	{
+		disconnect( document(), &QTextDocument::contentsChanged, this, &Editor::onContentChanged );
+
+		QTextCursor editCursor( document() );
+
+		editCursor.beginEditBlock();
+
+		QTextCursor found = editCursor;
+
+		while( !found.isNull() )
+		{
+			found = document()->find( d->highlightedTex, editCursor,
+				QTextDocument::FindCaseSensitively );
+
+			if( !found.isNull() )
+			{
+				editCursor.setPosition( found.selectionStart() );
+				editCursor.setPosition( found.selectionEnd(), QTextCursor::KeepAnchor );
+
+				editCursor.removeSelectedText();
+				editCursor.insertText( with );
+			}
+		}
+
+		editCursor.endEditBlock();
+
+		d->extraSelections.clear();
+
+		setExtraSelections( { d->currentLine } );
+	}
+
+	connect( document(), &QTextDocument::contentsChanged, this, &Editor::onContentChanged );
+}
+
+void
+Editor::onContentChanged()
+{
+	highlight( d->highlightedTex );
 }
 
 } /* namespace MdEditor */
