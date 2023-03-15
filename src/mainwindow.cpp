@@ -373,7 +373,7 @@ MainWindow::event( QEvent * event )
 
 				d->find->hide();
 				d->editor->setFocus();
-				d->editor->highlight( QString() );
+				d->editor->clearHighlighting();
 
 				return true;
 			}
@@ -579,7 +579,10 @@ MainWindow::onFind( bool )
 	if( !d->find->isVisible() )
 		d->find->show();
 
-	d->find->setFindText( d->editor->textCursor().selection().toPlainText() );
+	if( !d->editor->textCursor().selection().isEmpty() )
+		d->find->setFindText( d->editor->textCursor().selection().toPlainText() );
+	else
+		d->editor->highlightCurrent();
 }
 
 } /* namespace MdEditor */

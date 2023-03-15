@@ -64,6 +64,8 @@ public slots:
 	void clearExtraSelections();
 	void replaceCurrent( const QString & with );
 	void replaceAll( const QString & with );
+	void highlightCurrent();
+	void clearHighlighting();
 
 private slots:
 	void updateLineNumberAreaWidth( int newBlockCount );

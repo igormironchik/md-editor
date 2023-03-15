@@ -493,7 +493,21 @@ Editor::replaceAll( const QString & with )
 void
 Editor::onContentChanged()
 {
+	highlightCurrent();
+}
+
+void
+Editor::highlightCurrent()
+{
 	highlight( d->highlightedTex );
+}
+
+void
+Editor::clearHighlighting()
+{
+	d->extraSelections.clear();
+
+	setExtraSelections( { d->currentLine } );
 }
 
 } /* namespace MdEditor */
