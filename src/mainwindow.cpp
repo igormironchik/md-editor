@@ -134,7 +134,7 @@ struct MainWindowPrivate {
 			QIcon( QStringLiteral( ":/res/img/view-table-of-contents-ltr.png" ) ),
 			MainWindow::tr( "Show Line Numbers" ), q );
 		toggleLineNumbersAction->setCheckable( true );
-		toggleLineNumbersAction->setShortcut( MainWindow::tr( "Ctrl+L" ) );
+		toggleLineNumbersAction->setShortcut( MainWindow::tr( "Alt+L" ) );
 		toggleLineNumbersAction->setChecked( true );
 		settingsMenu->addAction( toggleLineNumbersAction );
 
@@ -142,7 +142,7 @@ struct MainWindowPrivate {
 			QIcon( QStringLiteral( ":/res/img/character-set.png" ) ),
 			MainWindow::tr( "Show Tabs/Spaces" ), q );
 		toggleUnprintableCharacters->setCheckable( true );
-		toggleUnprintableCharacters->setShortcut( MainWindow::tr( "Ctrl+T" ) );
+		toggleUnprintableCharacters->setShortcut( MainWindow::tr( "Alt+T" ) );
 		toggleUnprintableCharacters->setChecked( true );
 		settingsMenu->addAction( toggleUnprintableCharacters );
 
