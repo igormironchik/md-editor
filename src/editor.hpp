@@ -66,6 +66,7 @@ public slots:
 	void replaceAll( const QString & with );
 	void highlightCurrent();
 	void clearHighlighting();
+	void goToLine( int l );
 
 private slots:
 	void updateLineNumberAreaWidth( int newBlockCount );

@@ -20,7 +20,10 @@ set( SRC main.cpp
 	htmldocument.cpp
 	find.hpp
 	find.cpp
-	find.ui )
+	find.ui
+	gotoline.hpp
+	gotoline.cpp
+	gotoline.ui )
 
 qt6_add_resources( SRC resources.qrc )
 

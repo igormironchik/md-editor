@@ -23,57 +23,44 @@
 #pragma once
 
 // Qt include.
-#include <QMainWindow>
+#include <QFrame>
 #include <QScopedPointer>
 
 
 namespace MdEditor {
 
 //
-// MainWindow
+// GoToLine
 //
 
-struct MainWindowPrivate;
+struct GoToLinePrivate;
+class Editor;
 
-//! Main window.
-class MainWindow
-	:	public QMainWindow
+//! Go to line widget.
+class GoToLine
+	:	public QFrame
 {
 	Q_OBJECT
 
-public:
-	MainWindow();
-	~MainWindow() override;
+signals:
+	void hidded();
 
-protected:
-	void resizeEvent( QResizeEvent * e ) override;
-    void closeEvent( QCloseEvent * e ) override;
-	bool event( QEvent * event ) override;
+public:
+	GoToLine( Editor * editor, QWidget * parent );
+	~GoToLine() override;
+
+public slots:
+	void setFocus();
 
 private slots:
-    void onFileNew();
-    void onFileOpen();
-    void onFileSave();
-    void onFileSaveAs();
-	void onTextChanged();
-	void onAbout();
-	void onAboutQt();
-	void onLineHovered( int lineNumber, const QPoint & pos );
-	void onFind( bool on );
-	void onGoToLine( bool on );
-	void onGoToLineHidded();
+	void onEditingFinished();
 
 private:
-    bool isModified() const;
-	void openFile( const QString & path );
-	QString htmlContent() const;
+	friend struct GoToLinePrivate;
 
-private:
-	Q_DISABLE_COPY( MainWindow )
+	Q_DISABLE_COPY( GoToLine )
 
-	friend struct MainWindowPrivate;
-
-	QScopedPointer< MainWindowPrivate > d;
-}; // class MainWindow
+	QScopedPointer< GoToLinePrivate > d;
+}; // class GoToLine
 
 } /* namespace MdEditor */

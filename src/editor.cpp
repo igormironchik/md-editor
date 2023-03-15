@@ -56,6 +56,7 @@ struct EditorPrivate {
 		q->highlightCurrentLine();
 		q->showUnprintableCharacters( true );
 		q->setFocusPolicy( Qt::ClickFocus );
+		q->setCenterOnScroll( true );
 	}
 
 	Editor * q = nullptr;
@@ -509,6 +510,30 @@ Editor::clearHighlighting()
 	d->extraSelections.clear();
 
 	setExtraSelections( { d->currentLine } );
+}
+
+void
+Editor::goToLine( int l )
+{
+	QTextBlock block = document()->begin();
+	int blockNumber = block.blockNumber() + 1;
+
+	while( block.isValid() && blockNumber < l )
+	{
+		block = block.next();
+		++blockNumber;
+	}
+
+	if( !block.isValid() )
+		block = document()->lastBlock();
+
+	auto cursor = textCursor();
+	cursor.setPosition( block.position() );
+	setTextCursor( cursor );
+
+	ensureCursorVisible();
+
+	setFocus();
 }
 
 } /* namespace MdEditor */

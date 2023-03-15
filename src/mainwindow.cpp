@@ -27,6 +27,7 @@
 #include "previewpage.hpp"
 #include "htmldocument.hpp"
 #include "find.hpp"
+#include "gotoline.hpp"
 
 // Qt include.
 #include <QSplitter>
@@ -78,10 +79,13 @@ struct MainWindowPrivate {
 		v->setSpacing( 0 );
 		editor = new Editor( ew );
 		find = new Find( editor, ew );
+		gotoline = new GoToLine( editor, ew );
 		v->addWidget( editor );
+		v->addWidget( gotoline );
 		v->addWidget( find );
 		preview = new WebView( w );
 		find->hide();
+		gotoline->hide();
 
 		splitter->addWidget( ew );
 		splitter->addWidget( preview );
@@ -129,6 +133,10 @@ struct MainWindowPrivate {
 		toggleFindAction->setShortcut( MainWindow::tr( "Ctrl+F" ) );
 		editMenu->addAction( toggleFindAction );
 
+		auto toggleGoToLineAction = new QAction( MainWindow::tr( "Go to Line" ), q );
+		toggleGoToLineAction->setShortcut( MainWindow::tr( "Ctrl+L" ) );
+		editMenu->addAction( toggleGoToLineAction );
+
 		auto settingsMenu = q->menuBar()->addMenu( MainWindow::tr( "&Settings" ) );
 		auto toggleLineNumbersAction = new QAction(
 			QIcon( QStringLiteral( ":/res/img/view-table-of-contents-ltr.png" ) ),
@@ -169,6 +177,8 @@ struct MainWindowPrivate {
 			editor, &Editor::showUnprintableCharacters );
 		QObject::connect( toggleFindAction, &QAction::triggered,
 			q, &MainWindow::onFind );
+		QObject::connect( toggleGoToLineAction, &QAction::triggered,
+			q, &MainWindow::onGoToLine );
 		QObject::connect( page, &QWebEnginePage::linkHovered,
 			[this]( const QString & url )
 			{
@@ -177,6 +187,8 @@ struct MainWindowPrivate {
 				else
 					this->q->statusBar()->clearMessage();
 			} );
+		QObject::connect( gotoline, &GoToLine::hidded,
+			q, &MainWindow::onGoToLineHidded );
 	}
 
 	MainWindow * q = nullptr;
@@ -186,6 +198,7 @@ struct MainWindowPrivate {
 	QSplitter * splitter = nullptr;
 	HtmlDocument * html = nullptr;
 	Find * find = nullptr;
+	GoToLine * gotoline = nullptr;
 	QAction * newAction = nullptr;
 	QAction * openAction = nullptr;
 	QAction * saveAction = nullptr;
@@ -373,9 +386,18 @@ MainWindow::event( QEvent * event )
 			{
 				event->accept();
 
-				d->find->hide();
-				d->editor->setFocus();
-				d->editor->clearHighlighting();
+				if( d->gotoline->isVisible() )
+					d->gotoline->hide();
+				else if( d->find->isVisible() )
+					d->find->hide();
+
+				if( !d->find->isVisible() )
+				{
+					d->editor->setFocus();
+					d->editor->clearHighlighting();
+				}
+				else
+					d->find->setFocusOnFind();
 
 				return true;
 			}
@@ -588,6 +610,22 @@ MainWindow::onFind( bool )
 		d->editor->highlightCurrent();
 		d->find->setFocusOnFind();
 	}
+}
+
+void
+MainWindow::onGoToLine( bool )
+{
+	if( !d->gotoline->isVisible() )
+		d->gotoline->show();
+
+	d->gotoline->setFocus();
+}
+
+void
+MainWindow::onGoToLineHidded()
+{
+	if( d->find->isVisible() )
+		d->find->setFocusOnFind();
 }
 
 } /* namespace MdEditor */
