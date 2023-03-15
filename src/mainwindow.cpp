@@ -187,8 +187,6 @@ struct MainWindowPrivate {
 				else
 					this->q->statusBar()->clearMessage();
 			} );
-		QObject::connect( gotoline, &GoToLine::hidded,
-			q, &MainWindow::onGoToLineHidded );
 	}
 
 	MainWindow * q = nullptr;
@@ -619,13 +617,6 @@ MainWindow::onGoToLine( bool )
 		d->gotoline->show();
 
 	d->gotoline->setFocus();
-}
-
-void
-MainWindow::onGoToLineHidded()
-{
-	if( d->find->isVisible() )
-		d->find->setFocusOnFind();
 }
 
 } /* namespace MdEditor */

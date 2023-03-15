@@ -42,9 +42,6 @@ class GoToLine
 {
 	Q_OBJECT
 
-signals:
-	void hidded();
-
 public:
 	GoToLine( Editor * editor, QWidget * parent );
 	~GoToLine() override;

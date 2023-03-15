@@ -82,8 +82,6 @@ GoToLine::onEditingFinished()
 	d->editor->goToLine( d->ui.line->value() );
 
 	hide();
-
-	emit hidded();
 }
 
 } /* namespace MdEditor */

@@ -61,7 +61,6 @@ private slots:
 	void onLineHovered( int lineNumber, const QPoint & pos );
 	void onFind( bool on );
 	void onGoToLine( bool on );
-	void onGoToLineHidded();
 
 private:
     bool isModified() const;
