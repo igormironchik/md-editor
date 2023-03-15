@@ -55,6 +55,7 @@ struct EditorPrivate {
 		q->updateLineNumberAreaWidth( 0 );
 		q->highlightCurrentLine();
 		q->showUnprintableCharacters( true );
+		q->setFocusPolicy( Qt::ClickFocus );
 	}
 
 	Editor * q = nullptr;

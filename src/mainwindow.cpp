@@ -89,6 +89,8 @@ struct MainWindowPrivate {
 		l->addWidget( splitter );
 
 		q->setCentralWidget( w );
+		q->setFocusPolicy( Qt::ClickFocus );
+		w->setFocusPolicy( Qt::ClickFocus );
 
 		page = new PreviewPage( preview );
 		preview->setPage( page );
@@ -582,7 +584,10 @@ MainWindow::onFind( bool )
 	if( !d->editor->textCursor().selection().isEmpty() )
 		d->find->setFindText( d->editor->textCursor().selection().toPlainText() );
 	else
+	{
 		d->editor->highlightCurrent();
+		d->find->setFocusOnFind();
+	}
 }
 
 } /* namespace MdEditor */

@@ -42,6 +42,7 @@ struct WebViewPrivate {
 	void initUi()
 	{
 		q->setContextMenuPolicy( Qt::NoContextMenu );
+		q->setFocusPolicy( Qt::ClickFocus );
 	}
 
 	WebView * q;

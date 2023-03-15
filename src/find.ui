@@ -50,6 +50,9 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
        <property name="toolTip">
         <string>Find Previous &lt;small&gt;Shift+F3&lt;/small&gt;</string>
        </property>
@@ -68,6 +71,9 @@
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
        </property>
        <property name="toolTip">
         <string>Find Next &lt;small&gt;F3&lt;/small&gt;</string>
@@ -98,6 +104,9 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
        <property name="text">
         <string>Replace</string>
        </property>
@@ -114,6 +123,9 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
        <property name="text">
         <string>Replace All</string>
        </property>
@@ -123,6 +135,14 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>findEdit</tabstop>
+  <tabstop>replaceEdit</tabstop>
+  <tabstop>findPrevBtn</tabstop>
+  <tabstop>findNextBtn</tabstop>
+  <tabstop>replaceBtn</tabstop>
+  <tabstop>replaceAllBtn</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

@@ -48,6 +48,7 @@ public:
 
 public slots:
 	void setFindText( const QString & text );
+	void setFocusOnFind();
 
 private slots:
 	void onFindTextChanged( const QString & str );

@@ -34,6 +34,7 @@ PreviewPage::PreviewPage( QObject * parent )
 	:	QWebEnginePage( parent )
 {
 	settings()->setAttribute( QWebEngineSettings::LocalContentCanAccessRemoteUrls, true );
+	settings()->setAttribute( QWebEngineSettings::LinksIncludedInFocusChain, false );
 }
 
 bool
