@@ -24,6 +24,7 @@
 #include <QString>
 #include <QApplication>
 #include <QScreen>
+#include <QCommandLineParser>
 
 // md-editor include.
 #include "mainwindow.hpp"
@@ -32,6 +33,16 @@
 int main( int argc, char ** argv )
 {
 	QApplication app( argc, argv );
+
+	QCommandLineParser parser;
+	parser.addPositionalArgument( QStringLiteral( "markdown" ),
+		QStringLiteral( "Markdown file to open." ) );
+
+	parser.process( app );
+
+	const auto args = parser.positionalArguments();
+
+	const auto fileName = ( args.isEmpty() ? QString() : args.at( 0 ) );
 
 	QIcon appIcon( QStringLiteral( ":/res/img/icon_256x256.png" ) );
 	appIcon.addFile( QStringLiteral( ":/res/img/icon_128x128.png" ) );
@@ -47,6 +58,9 @@ int main( int argc, char ** argv )
 	w.resize( qRound( (double) screenSize.width() * 0.85 ),
 		qRound( (double) screenSize.height() * 0.85 ) );
 	w.show();
+
+	if( !fileName.isEmpty() )
+		w.openFile( fileName );
 
 	return QApplication::exec();
 }

@@ -45,6 +45,8 @@ public:
 	MainWindow();
 	~MainWindow() override;
 
+	void openFile( const QString & path );
+
 protected:
 	void resizeEvent( QResizeEvent * e ) override;
     void closeEvent( QCloseEvent * e ) override;
@@ -64,7 +66,6 @@ private slots:
 
 private:
     bool isModified() const;
-	void openFile( const QString & path );
 	QString htmlContent() const;
 
 private:
