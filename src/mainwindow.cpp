@@ -257,6 +257,7 @@ MainWindow::openFile( const QString & path )
 	f.close();
 	setWindowTitle( MainWindow::tr( "%1[*] - Markdown Editor" )
 		.arg( QFileInfo( d->editor->docName() ).fileName() ) );
+	d->editor->setFocus();
 }
 
 bool
