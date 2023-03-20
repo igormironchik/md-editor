@@ -1,0 +1,17 @@
+{forGeneration MDEDITOR__CFG_HPP
+
+	{namespace MdEditor
+		{class Cfg
+			{tagScalar
+				{valueType QString}
+				{name font}
+				{defaultValue ""}
+			}
+			{tagScalar
+				{valueType int}
+				{name fontSize}
+				{defaultValue -1}
+			}
+		}
+	}
+}

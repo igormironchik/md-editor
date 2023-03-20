@@ -28,6 +28,8 @@
 #include "htmldocument.hpp"
 #include "find.hpp"
 #include "gotoline.hpp"
+#include "fontdlg.hpp"
+#include "cfg.hpp"
 
 // Qt include.
 #include <QSplitter>
@@ -54,6 +56,9 @@
 #include <md4qt/traits.hpp>
 #include <md4qt/parser.hpp>
 #include <md4qt/html.hpp>
+
+// cfgfile include.
+#include <cfgfile/all.hpp>
 
 
 namespace MdEditor {
@@ -154,6 +159,19 @@ struct MainWindowPrivate {
 		toggleUnprintableCharacters->setChecked( true );
 		settingsMenu->addAction( toggleUnprintableCharacters );
 
+		settingsMenu->addSeparator();
+
+		settingsMenu->addAction( MainWindow::tr( "Font..." ),
+			q, &MainWindow::onChooseFont );
+
+		settingsMenu->addSeparator();
+		settingsMenu->addAction( QIcon( QStringLiteral( ":/res/img/format-font-size-less.png" ) ),
+			MainWindow::tr( "Less Font Size" ), MainWindow::tr( "Ctrl+-" ),
+			q, &MainWindow::onLessFontSize );
+		settingsMenu->addAction( QIcon( QStringLiteral( ":/res/img/format-font-size-more.png" ) ),
+			MainWindow::tr( "More Font Size" ), MainWindow::tr( "Ctrl+=" ),
+			q, &MainWindow::onMoreFontSize );
+
 		auto helpMenu = q->menuBar()->addMenu( MainWindow::tr( "&Help" ) );
 		helpMenu->addAction( QIcon( QStringLiteral( ":/res/img/icon_24x24.png" ) ),
 			MainWindow::tr( "About" ), q, &MainWindow::onAbout );
@@ -187,6 +205,8 @@ struct MainWindowPrivate {
 				else
 					this->q->statusBar()->clearMessage();
 			} );
+
+		q->readCfg();
 	}
 
 	MainWindow * q = nullptr;
@@ -618,6 +638,110 @@ MainWindow::onGoToLine( bool )
 		d->gotoline->show();
 
 	d->gotoline->setFocus();
+}
+
+void
+MainWindow::onChooseFont()
+{
+	FontDlg dlg( d->editor->font(), this );
+
+	if( dlg.exec() == QDialog::Accepted )
+	{
+		d->editor->setFont( dlg.font() );
+
+		saveCfg( dlg.font() );
+	}
+}
+
+static const QString c_appCfgFileName = QStringLiteral( "md-editor.cfg" );
+
+void
+MainWindow::saveCfg( const QFont & f ) const
+{
+	QFile file( c_appCfgFileName );
+
+	if( file.open( QIODevice::WriteOnly ) )
+	{
+		try {
+			Cfg cfg;
+			cfg.set_font( f.family() );
+			cfg.set_fontSize( f.pointSize() );
+
+			tag_Cfg< cfgfile::qstring_trait_t > tag( cfg );
+
+			QTextStream stream( &file );
+
+			cfgfile::write_cfgfile( tag, stream );
+
+			file.close();
+		}
+		catch( const cfgfile::exception_t< cfgfile::qstring_trait_t > & )
+		{
+			file.close();
+		}
+	}
+}
+
+void
+MainWindow::readCfg()
+{
+	QFile file( c_appCfgFileName );
+
+	if( file.open( QIODevice::ReadOnly ) )
+	{
+		try {
+			tag_Cfg< cfgfile::qstring_trait_t > tag;
+
+			QTextStream stream( &file );
+
+			cfgfile::read_cfgfile( tag, stream, c_appCfgFileName );
+
+			file.close();
+
+			const auto cfg = tag.get_cfg();
+
+			if( !cfg.font().isEmpty() && cfg.fontSize() != -1 )
+			{
+				const QFont f( cfg.font(), cfg.fontSize() );
+
+				d->editor->setFont( f );
+			}
+		}
+		catch( const cfgfile::exception_t< cfgfile::qstring_trait_t > & )
+		{
+			file.close();
+		}
+	}
+}
+
+void
+MainWindow::onLessFontSize()
+{
+	auto f = d->editor->font();
+
+	if( f.pointSize() > 5 )
+	{
+		f.setPointSize( f.pointSize() - 1 );
+
+		d->editor->setFont( f );
+
+		saveCfg( f );
+	}
+}
+
+void
+MainWindow::onMoreFontSize()
+{
+	auto f = d->editor->font();
+
+	if( f.pointSize() < 66 )
+	{
+		f.setPointSize( f.pointSize() + 1 );
+
+		d->editor->setFont( f );
+
+		saveCfg( f );
+	}
 }
 
 } /* namespace MdEditor */

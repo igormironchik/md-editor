@@ -63,10 +63,15 @@ private slots:
 	void onLineHovered( int lineNumber, const QPoint & pos );
 	void onFind( bool on );
 	void onGoToLine( bool on );
+	void onChooseFont();
+	void onLessFontSize();
+	void onMoreFontSize();
 
 private:
     bool isModified() const;
 	QString htmlContent() const;
+	void saveCfg( const QFont & f ) const;
+	void readCfg();
 
 private:
 	Q_DISABLE_COPY( MainWindow )
