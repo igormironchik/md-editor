@@ -139,7 +139,9 @@ struct MainWindowPrivate {
 		toggleFindAction->setShortcut( MainWindow::tr( "Ctrl+F" ) );
 		editMenu->addAction( toggleFindAction );
 
-		auto toggleGoToLineAction = new QAction( MainWindow::tr( "Go to Line" ), q );
+		auto toggleGoToLineAction = new QAction(
+			QIcon( QStringLiteral( ":/res/img/go-next-use.png" ) ),
+			MainWindow::tr( "Go to Line" ), q );
 		toggleGoToLineAction->setShortcut( MainWindow::tr( "Ctrl+L" ) );
 		editMenu->addAction( toggleGoToLineAction );
 
@@ -171,7 +173,8 @@ struct MainWindowPrivate {
 
 		settingsMenu->addSeparator();
 
-		settingsMenu->addAction( MainWindow::tr( "Font..." ),
+		settingsMenu->addAction( QIcon( QStringLiteral( ":/res/img/preferences-desktop-font.png" ) ),
+			MainWindow::tr( "Font..." ),
 			q, &MainWindow::onChooseFont );
 
 

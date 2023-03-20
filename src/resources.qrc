@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/">
+        <file>res/img/preferences-desktop-font.png</file>
+        <file>res/img/go-next-use.png</file>
         <file>res/img/format-font-size-less.png</file>
         <file>res/img/format-font-size-more.png</file>
         <file>res/img/application-exit.png</file>
