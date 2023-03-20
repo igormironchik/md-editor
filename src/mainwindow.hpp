@@ -70,7 +70,7 @@ private slots:
 private:
     bool isModified() const;
 	QString htmlContent() const;
-	void saveCfg( const QFont & f ) const;
+	void saveCfg() const;
 	void readCfg();
 
 private:

@@ -162,16 +162,18 @@ struct MainWindowPrivate {
 
 		settingsMenu->addSeparator();
 
+		settingsMenu->addAction( QIcon( QStringLiteral( ":/res/img/format-font-size-less.png" ) ),
+			MainWindow::tr( "Decrease Font Size" ), MainWindow::tr( "Ctrl+-" ),
+			q, &MainWindow::onLessFontSize );
+		settingsMenu->addAction( QIcon( QStringLiteral( ":/res/img/format-font-size-more.png" ) ),
+			MainWindow::tr( "Increase Font Size" ), MainWindow::tr( "Ctrl+=" ),
+			q, &MainWindow::onMoreFontSize );
+
+		settingsMenu->addSeparator();
+
 		settingsMenu->addAction( MainWindow::tr( "Font..." ),
 			q, &MainWindow::onChooseFont );
 
-		settingsMenu->addSeparator();
-		settingsMenu->addAction( QIcon( QStringLiteral( ":/res/img/format-font-size-less.png" ) ),
-			MainWindow::tr( "Less Font Size" ), MainWindow::tr( "Ctrl+-" ),
-			q, &MainWindow::onLessFontSize );
-		settingsMenu->addAction( QIcon( QStringLiteral( ":/res/img/format-font-size-more.png" ) ),
-			MainWindow::tr( "More Font Size" ), MainWindow::tr( "Ctrl+=" ),
-			q, &MainWindow::onMoreFontSize );
 
 		auto helpMenu = q->menuBar()->addMenu( MainWindow::tr( "&Help" ) );
 		helpMenu->addAction( QIcon( QStringLiteral( ":/res/img/icon_24x24.png" ) ),
@@ -650,20 +652,22 @@ MainWindow::onChooseFont()
 	{
 		d->editor->setFont( dlg.font() );
 
-		saveCfg( dlg.font() );
+		saveCfg();
 	}
 }
 
 static const QString c_appCfgFileName = QStringLiteral( "md-editor.cfg" );
 
 void
-MainWindow::saveCfg( const QFont & f ) const
+MainWindow::saveCfg() const
 {
 	QFile file( QApplication::applicationDirPath() + QDir::separator() + c_appCfgFileName );
 
 	if( file.open( QIODevice::WriteOnly ) )
 	{
 		try {
+			const auto f = d->editor->font();
+
 			Cfg cfg;
 			cfg.set_font( f.family() );
 			cfg.set_fontSize( f.pointSize() );
@@ -726,7 +730,7 @@ MainWindow::onLessFontSize()
 
 		d->editor->setFont( f );
 
-		saveCfg( f );
+		saveCfg();
 	}
 }
 
@@ -741,7 +745,7 @@ MainWindow::onMoreFontSize()
 
 		d->editor->setFont( f );
 
-		saveCfg( f );
+		saveCfg();
 	}
 }
 
