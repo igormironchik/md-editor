@@ -184,11 +184,6 @@ struct MainWindowPrivate {
 		helpMenu->addAction( QIcon( QStringLiteral( ":/res/img/qt.png" ) ),
 			MainWindow::tr( "About Qt" ), q, &MainWindow::onAboutQt );
 
-		QFile css( ":/res/css/github-markdown.css" );
-		css.open( QIODevice::ReadOnly );
-		mdCss = css.readAll();
-		css.close();
-
 		QObject::connect( editor->document(), &QTextDocument::modificationChanged,
 			saveAction, &QAction::setEnabled );
 		QObject::connect( editor->document(), &QTextDocument::modificationChanged,
@@ -229,7 +224,6 @@ struct MainWindowPrivate {
 	QAction * saveAsAction = nullptr;
 	bool init = false;
 	std::shared_ptr< MD::Document< MD::QStringTrait > > mdDoc;
-	QString mdCss;
 	QString baseUrl;
 }; // struct MainWindowPrivate
 
@@ -443,9 +437,9 @@ MainWindow::htmlContent() const
 		"<meta charset=\"utf-8\">\n"
 		"<head>\n"
 		"  <script src=\"qrc:/qtwebchannel/qwebchannel.js\"></script>\n"
-		"  <style>\n"
-		"  %1\n"
-		"  </style>\n"
+		"  <link rel=\"stylesheet\" href=\"qrc:/res/css/default.min.css\">\n"
+		"  <link rel=\"stylesheet\" href=\"qrc:/res/css/github-markdown.css\">\n"
+		"  <script src=\"qrc:/res/highlight.min.js\"></script>\n"
 		"</head>\n"
 		"<body>\n"
 		"  <div id=\"placeholder\"></div>\n"
@@ -456,6 +450,7 @@ MainWindow::htmlContent() const
 		"\n"
 		"  var updateText = function(text) {\n"
 		"	  placeholder.innerHTML = text;\n"
+		"     hljs.highlightAll();\n"
 		"  }\n"
 		"\n"
 		"  new QWebChannel(qt.webChannelTransport,\n"
@@ -467,8 +462,7 @@ MainWindow::htmlContent() const
 		"  );\n"
 		"  </script>\n"
 		"</body>\n"
-		"</html>" )
-			.arg( d->mdCss );
+		"</html>" );
 }
 
 void
