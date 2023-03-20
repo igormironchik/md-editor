@@ -50,6 +50,7 @@
 #include <QVBoxLayout>
 #include <QTextDocumentFragment>
 #include <QStatusBar>
+#include <QApplication>
 
 // md4qt include.
 #define MD4QT_QT_SUPPORT
@@ -658,7 +659,7 @@ static const QString c_appCfgFileName = QStringLiteral( "md-editor.cfg" );
 void
 MainWindow::saveCfg( const QFont & f ) const
 {
-	QFile file( c_appCfgFileName );
+	QFile file( QApplication::applicationDirPath() + QDir::separator() + c_appCfgFileName );
 
 	if( file.open( QIODevice::WriteOnly ) )
 	{
@@ -685,7 +686,7 @@ MainWindow::saveCfg( const QFont & f ) const
 void
 MainWindow::readCfg()
 {
-	QFile file( c_appCfgFileName );
+	QFile file( QApplication::applicationDirPath() + QDir::separator() + c_appCfgFileName );
 
 	if( file.open( QIODevice::ReadOnly ) )
 	{
