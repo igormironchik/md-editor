@@ -24,6 +24,7 @@
 #include "find.hpp"
 #include "ui_find.h"
 #include "editor.hpp"
+#include "mainwindow.hpp"
 
 
 namespace MdEditor {
@@ -33,9 +34,10 @@ namespace MdEditor {
 //
 
 struct FindPrivate {
-	FindPrivate( Editor * e, Find * parent )
+	FindPrivate( MainWindow * w, Editor * e, Find * parent )
 		:	q( parent )
 		,	editor( e )
+		,	window( w )
 	{
 	}
 
@@ -82,10 +84,13 @@ struct FindPrivate {
 			q, &Find::onReplaceAll );
 		QObject::connect( editor, &QPlainTextEdit::selectionChanged,
 			q, &Find::onSelectionChanged );
+		QObject::connect( ui.close, &QToolButton::clicked,
+			q, &Find::onClose );
 	}
 
 	Find * q = nullptr;
 	Editor * editor = nullptr;
+	MainWindow * window = nullptr;
 	Ui::Find ui;
 }; // struct FindPrivate
 
@@ -94,9 +99,9 @@ struct FindPrivate {
 // Find
 //
 
-Find::Find( Editor * editor, QWidget * parent )
+Find::Find( MainWindow * window, Editor * editor, QWidget * parent )
 	:	QFrame( parent )
-	,	d( new FindPrivate( editor, this ) )
+	,	d( new FindPrivate( window, editor, this ) )
 {
 	d->initUi();
 }
@@ -160,6 +165,14 @@ Find::onSelectionChanged()
 		!d->ui.replaceEdit->text().isEmpty() );
 	d->ui.replaceAllBtn->setEnabled( d->editor->foundHighlighted() &&
 		!d->ui.replaceEdit->text().isEmpty() );
+}
+
+void
+Find::onClose()
+{
+	hide();
+
+	d->window->onToolHide();
 }
 
 } /* namespace MdEditor */

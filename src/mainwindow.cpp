@@ -84,8 +84,8 @@ struct MainWindowPrivate {
 		v->setContentsMargins( 0, 0, 0, 0 );
 		v->setSpacing( 0 );
 		editor = new Editor( ew );
-		find = new Find( editor, ew );
-		gotoline = new GoToLine( editor, ew );
+		find = new Find( q, editor, ew );
+		gotoline = new GoToLine( q, editor, ew );
 		v->addWidget( editor );
 		v->addWidget( gotoline );
 		v->addWidget( find );
@@ -410,13 +410,7 @@ MainWindow::event( QEvent * event )
 				else if( d->find->isVisible() )
 					d->find->hide();
 
-				if( !d->find->isVisible() )
-				{
-					d->editor->setFocus();
-					d->editor->clearHighlighting();
-				}
-				else
-					d->find->setFocusOnFind();
+				onToolHide();
 
 				return true;
 			}
@@ -428,6 +422,20 @@ MainWindow::event( QEvent * event )
 	}
 
 	return QMainWindow::event( event );
+}
+
+void
+MainWindow::onToolHide()
+{
+	if( !d->find->isVisible() && ! d->gotoline->isVisible() )
+	{
+		d->editor->setFocus();
+		d->editor->clearHighlighting();
+	}
+	else if( d->find->isVisible() && ! d->gotoline->isVisible() )
+		d->find->setFocusOnFind();
+	else if( d->gotoline->isVisible() && ! d->find->isVisible() )
+		d->gotoline->setFocus();
 }
 
 QString

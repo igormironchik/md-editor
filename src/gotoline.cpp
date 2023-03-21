@@ -24,6 +24,10 @@
 #include "gotoline.hpp"
 #include "ui_gotoline.h"
 #include "editor.hpp"
+#include "mainwindow.hpp"
+
+// Qt include.
+#include <QIntValidator>
 
 
 namespace MdEditor {
@@ -33,9 +37,10 @@ namespace MdEditor {
 //
 
 struct GoToLinePrivate {
-	GoToLinePrivate( Editor * e, GoToLine * parent )
+	GoToLinePrivate( MainWindow * w, Editor * e, GoToLine * parent )
 		:	q( parent )
 		,	editor( e )
+		,	window( w )
 	{
 	}
 
@@ -43,12 +48,19 @@ struct GoToLinePrivate {
 	{
 		ui.setupUi( q );
 
-		QObject::connect( ui.line, &QSpinBox::editingFinished,
+		auto intValidator = new QIntValidator( 1, 999999, ui.line );
+		ui.line->setValidator( intValidator );
+
+		QObject::connect( ui.line, &QLineEdit::returnPressed,
 			q, &GoToLine::onEditingFinished );
+
+		QObject::connect( ui.close, &QToolButton::clicked,
+			q, &GoToLine::onClose );
 	}
 
 	GoToLine * q = nullptr;
 	Editor * editor = nullptr;
+	MainWindow * window = nullptr;
 	Ui::GoToLine ui;
 }; // struct FindPrivate
 
@@ -57,9 +69,9 @@ struct GoToLinePrivate {
 // GoToLine
 //
 
-GoToLine::GoToLine( Editor * editor, QWidget * parent )
+GoToLine::GoToLine( MainWindow * window, Editor * editor, QWidget * parent )
 	:	QFrame( parent )
-	,	d( new GoToLinePrivate( editor, this ) )
+	,	d( new GoToLinePrivate( window, editor, this ) )
 {
 	d->initUi();
 }
@@ -72,16 +84,23 @@ void
 GoToLine::setFocus()
 {
 	d->ui.line->setFocus();
-	d->ui.line->setValue( 0 );
 	d->ui.line->selectAll();
 }
 
 void
 GoToLine::onEditingFinished()
 {
-	d->editor->goToLine( d->ui.line->value() );
+	d->editor->goToLine( d->ui.line->text().toInt() );
 
 	hide();
+}
+
+void
+GoToLine::onClose()
+{
+	hide();
+
+	d->window->onToolHide();
 }
 
 } /* namespace MdEditor */

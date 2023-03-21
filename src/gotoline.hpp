@@ -35,6 +35,7 @@ namespace MdEditor {
 
 struct GoToLinePrivate;
 class Editor;
+class MainWindow;
 
 //! Go to line widget.
 class GoToLine
@@ -43,7 +44,7 @@ class GoToLine
 	Q_OBJECT
 
 public:
-	GoToLine( Editor * editor, QWidget * parent );
+	GoToLine( MainWindow * window, Editor * editor, QWidget * parent );
 	~GoToLine() override;
 
 public slots:
@@ -51,6 +52,7 @@ public slots:
 
 private slots:
 	void onEditingFinished();
+	void onClose();
 
 private:
 	friend struct GoToLinePrivate;

@@ -66,6 +66,7 @@ private slots:
 	void onChooseFont();
 	void onLessFontSize();
 	void onMoreFontSize();
+	void onToolHide();
 
 private:
     bool isModified() const;
@@ -77,6 +78,8 @@ private:
 	Q_DISABLE_COPY( MainWindow )
 
 	friend struct MainWindowPrivate;
+	friend class Find;
+	friend class GoToLine;
 
 	QScopedPointer< MainWindowPrivate > d;
 }; // class MainWindow

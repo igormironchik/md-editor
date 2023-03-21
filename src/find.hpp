@@ -35,6 +35,7 @@ namespace MdEditor {
 
 struct FindPrivate;
 class Editor;
+class MainWindow;
 
 //! Find/replace widget.
 class Find
@@ -43,7 +44,7 @@ class Find
 	Q_OBJECT
 
 public:
-	Find( Editor * editor, QWidget * parent );
+	Find( MainWindow * window, Editor * editor, QWidget * parent );
 	~Find() override;
 
 public slots:
@@ -56,6 +57,7 @@ private slots:
 	void onReplace();
 	void onReplaceAll();
 	void onSelectionChanged();
+	void onClose();
 
 private:
 	friend struct FindPrivate;
