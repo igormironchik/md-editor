@@ -14,4 +14,4 @@ Build process is quite easy, just use `QtCreator` to open `CMakeLists.txt` and b
 
 # Screenshot
 
-![md-editor](md-editor.png)
+![md-editor](md-editor.png?)
