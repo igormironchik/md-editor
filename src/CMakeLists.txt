@@ -27,7 +27,9 @@ set( SRC main.cpp
 	fontdlg.hpp
 	fontdlg.cpp
 	fontdlg.ui
-	${CMAKE_CURRENT_BINARY_DIR}/cfg.hpp )
+	${CMAKE_CURRENT_BINARY_DIR}/cfg.hpp
+	closebutton.hpp
+	closebutton.cpp )
 
 qt6_add_resources( SRC resources.qrc )
 

@@ -84,7 +84,7 @@ struct FindPrivate {
 			q, &Find::onReplaceAll );
 		QObject::connect( editor, &QPlainTextEdit::selectionChanged,
 			q, &Find::onSelectionChanged );
-		QObject::connect( ui.close, &QToolButton::clicked,
+		QObject::connect( ui.close, &QAbstractButton::clicked,
 			q, &Find::onClose );
 	}
 

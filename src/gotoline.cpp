@@ -54,7 +54,7 @@ struct GoToLinePrivate {
 		QObject::connect( ui.line, &QLineEdit::returnPressed,
 			q, &GoToLine::onEditingFinished );
 
-		QObject::connect( ui.close, &QToolButton::clicked,
+		QObject::connect( ui.close, &QAbstractButton::clicked,
 			q, &GoToLine::onClose );
 	}
 

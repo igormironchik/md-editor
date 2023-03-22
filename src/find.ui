@@ -41,19 +41,18 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QToolButton" name="close">
-       <property name="maximumSize">
+      <widget class="MdEditor::CloseButton" name="close" native="true">
+       <property name="minimumSize">
         <size>
          <width>16</width>
          <height>16</height>
         </size>
        </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="resources.qrc">
-         <normaloff>:/res/img/dialog-close.png</normaloff>:/res/img/dialog-close.png</iconset>
+       <property name="maximumSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
        </property>
       </widget>
      </item>
@@ -202,6 +201,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MdEditor::CloseButton</class>
+   <extends>QWidget</extends>
+   <header>closebutton.hpp</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>findEdit</tabstop>
   <tabstop>replaceEdit</tabstop>
@@ -210,8 +217,6 @@
   <tabstop>replaceBtn</tabstop>
   <tabstop>replaceAllBtn</tabstop>
  </tabstops>
- <resources>
-  <include location="resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
