@@ -67,6 +67,8 @@ private slots:
 	void onLessFontSize();
 	void onMoreFontSize();
 	void onToolHide();
+	void onCursorPositionChanged();
+	void onEditMenuActionTriggered( QAction * action );
 
 private:
     bool isModified() const;

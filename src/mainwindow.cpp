@@ -132,18 +132,18 @@ struct MainWindowPrivate {
 		fileMenu->addAction( QIcon( QStringLiteral( ":/res/img/application-exit.png" ) ),
 			MainWindow::tr( "Quit" ), MainWindow::tr( "Ctrl+Q" ), q, &QWidget::close );
 
-		auto editMenu = q->menuBar()->addMenu( MainWindow::tr( "&Edit" ) );
-		auto toggleFindAction = new QAction(
+		editMenuAction = q->menuBar()->addAction( MainWindow::tr( "&Edit" ) );
+		toggleFindAction = new QAction(
 			QIcon( QStringLiteral( ":/res/img/edit-find.png" ) ),
 			MainWindow::tr( "Find/Replace" ), q );
 		toggleFindAction->setShortcut( MainWindow::tr( "Ctrl+F" ) );
-		editMenu->addAction( toggleFindAction );
+		q->addAction( toggleFindAction );
 
-		auto toggleGoToLineAction = new QAction(
+		toggleGoToLineAction = new QAction(
 			QIcon( QStringLiteral( ":/res/img/go-next-use.png" ) ),
 			MainWindow::tr( "Go to Line" ), q );
 		toggleGoToLineAction->setShortcut( MainWindow::tr( "Ctrl+L" ) );
-		editMenu->addAction( toggleGoToLineAction );
+		q->addAction( toggleGoToLineAction );
 
 		auto settingsMenu = q->menuBar()->addMenu( MainWindow::tr( "&Settings" ) );
 		auto toggleLineNumbersAction = new QAction(
@@ -206,8 +206,14 @@ struct MainWindowPrivate {
 				else
 					this->q->statusBar()->clearMessage();
 			} );
+		QObject::connect( editor, &QPlainTextEdit::cursorPositionChanged,
+			q, &MainWindow::onCursorPositionChanged );
 
 		q->readCfg();
+
+		q->onCursorPositionChanged();
+
+		editor->setFocus();
 	}
 
 	MainWindow * q = nullptr;
@@ -222,6 +228,10 @@ struct MainWindowPrivate {
 	QAction * openAction = nullptr;
 	QAction * saveAction = nullptr;
 	QAction * saveAsAction = nullptr;
+	QAction * toggleFindAction = nullptr;
+	QAction * toggleGoToLineAction = nullptr;
+	QAction * editMenuAction = nullptr;
+	QMenu * standardEditMenu = nullptr;
 	bool init = false;
 	std::shared_ptr< MD::Document< MD::QStringTrait > > mdDoc;
 	QString baseUrl;
@@ -240,6 +250,10 @@ MainWindow::MainWindow()
 
 MainWindow::~MainWindow()
 {
+	if( d->standardEditMenu )
+		d->standardEditMenu->deleteLater();
+
+	d->standardEditMenu = nullptr;
 }
 
 void
@@ -278,6 +292,7 @@ MainWindow::openFile( const QString & path )
 	setWindowTitle( MainWindow::tr( "%1[*] - Markdown Editor" )
 		.arg( QFileInfo( d->editor->docName() ).fileName() ) );
 	d->editor->setFocus();
+	onCursorPositionChanged();
 }
 
 bool
@@ -306,6 +321,7 @@ MainWindow::onFileNew()
 	d->baseUrl = QString( "file:%1/" ).arg(
 		QStandardPaths::standardLocations( QStandardPaths::HomeLocation ).first() );
 	d->page->setHtml( htmlContent(), d->baseUrl );
+	onCursorPositionChanged();
 }
 
 void
@@ -752,6 +768,36 @@ MainWindow::onMoreFontSize()
 
 		saveCfg();
 	}
+}
+
+void
+MainWindow::onCursorPositionChanged()
+{
+	if( d->standardEditMenu )
+	{
+		d->standardEditMenu->deleteLater();
+		d->standardEditMenu = nullptr;
+	}
+
+	d->standardEditMenu = d->editor->createStandardContextMenu(
+		d->editor->cursorRect().center() );
+
+	d->standardEditMenu->addSeparator();
+
+	d->standardEditMenu->addAction( d->toggleFindAction );
+	d->standardEditMenu->addAction( d->toggleGoToLineAction );
+
+	d->editMenuAction->setMenu( d->standardEditMenu );
+
+	connect( d->standardEditMenu, &QMenu::triggered,
+		this, &MainWindow::onEditMenuActionTriggered );
+}
+
+void
+MainWindow::onEditMenuActionTriggered( QAction * action )
+{
+	if( action != d->toggleFindAction && action != d->toggleGoToLineAction )
+		d->editor->setFocus();
 }
 
 } /* namespace MdEditor */
