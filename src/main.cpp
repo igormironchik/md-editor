@@ -35,8 +35,16 @@ int main( int argc, char ** argv )
 	QApplication app( argc, argv );
 
 	QCommandLineParser parser;
+	parser.setApplicationDescription( QStringLiteral( "Markdown editor and viewer." ) );
+	parser.addHelpOption();
 	parser.addPositionalArgument( QStringLiteral( "markdown" ),
 		QStringLiteral( "Markdown file to open." ) );
+	QCommandLineOption view( QStringList() << "v" << "view",
+		QStringLiteral( "Open Markdown file in view (HTML preview) mode." ) );
+	QCommandLineOption all( QStringList() << "a" << "all",
+		QStringLiteral( "Load all linked Markdown files." ) );
+	parser.addOption( view );
+	parser.addOption( all );
 
 	parser.process( app );
 
@@ -57,10 +65,19 @@ int main( int argc, char ** argv )
 	const auto screenSize = app.primaryScreen()->availableGeometry().size();
 	w.resize( qRound( (double) screenSize.width() * 0.85 ),
 		qRound( (double) screenSize.height() * 0.85 ) );
-	w.show();
 
 	if( !fileName.isEmpty() )
 		w.openFile( fileName );
+
+	if( parser.isSet( view ) )
+		w.openInPreviewMode( parser.isSet( all ) );
+	else if( parser.isSet( all ) )
+		w.loadAllLinkedFiles();
+
+	if( parser.isSet( view ) && fileName.isEmpty() )
+		return 0;
+
+	w.show();
 
 	return QApplication::exec();
 }

@@ -49,7 +49,10 @@ public:
 	MainWindow();
 	~MainWindow() override;
 
+public slots:
 	void openFile( const QString & path );
+	void openInPreviewMode( bool loadAllLinked );
+	void loadAllLinkedFiles();
 
 protected:
 	void resizeEvent( QResizeEvent * e ) override;
@@ -73,7 +76,6 @@ private slots:
 	void onToolHide();
 	void onCursorPositionChanged();
 	void onEditMenuActionTriggered( QAction * action );
-	void onLoadAllLinkedFiles();
 	void closeAllLinkedFiles();
 	void onNavigationDoubleClicked( QTreeWidgetItem * item, int column );
 

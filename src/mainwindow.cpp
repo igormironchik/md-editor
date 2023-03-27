@@ -132,7 +132,7 @@ struct MainWindowPrivate {
 			MainWindow::tr( "Save As" ), q, &MainWindow::onFileSaveAs );
 		fileMenu->addSeparator();
 		loadAllAction = fileMenu->addAction( MainWindow::tr( "Load All Linked Files..." ),
-			MainWindow::tr( "Ctrl+R" ), q, &MainWindow::onLoadAllLinkedFiles );
+			MainWindow::tr( "Ctrl+R" ), q, &MainWindow::loadAllLinkedFiles );
 		loadAllAction->setEnabled( false );
 		fileMenu->addSeparator();
 		fileMenu->addAction( QIcon( QStringLiteral( ":/res/img/application-exit.png" ) ),
@@ -151,7 +151,7 @@ struct MainWindowPrivate {
 		toggleGoToLineAction->setShortcut( MainWindow::tr( "Ctrl+L" ) );
 		q->addAction( toggleGoToLineAction );
 
-		auto settingsMenu = q->menuBar()->addMenu( MainWindow::tr( "&Settings" ) );
+		settingsMenu = q->menuBar()->addMenu( MainWindow::tr( "&Settings" ) );
 		auto toggleLineNumbersAction = new QAction(
 			QIcon( QStringLiteral( ":/res/img/view-table-of-contents-ltr.png" ) ),
 			MainWindow::tr( "Show Line Numbers" ), q );
@@ -239,10 +239,12 @@ struct MainWindowPrivate {
 	QAction * editMenuAction = nullptr;
 	QAction * loadAllAction = nullptr;
 	QMenu * standardEditMenu = nullptr;
+	QMenu * settingsMenu = nullptr;
 	QDockWidget * fileTreeDock = nullptr;
 	QTreeWidget * fileTree = nullptr;
 	bool init = false;
 	bool loadAllFlag = false;
+	bool previewMode = false;
 	std::shared_ptr< MD::Document< MD::QStringTrait > > mdDoc;
 	QString baseUrl;
 	QString rootFilePath;
@@ -276,7 +278,10 @@ MainWindow::resizeEvent( QResizeEvent * e )
 
 		auto w = centralWidget()->width() / 2;
 
-		d->splitter->setSizes( { w, w } );
+		if( !d->previewMode )
+			d->splitter->setSizes( { w, w } );
+		else
+			d->splitter->setSizes( { 0, centralWidget()->width() } );
 	}
 
 	e->accept();
@@ -300,14 +305,46 @@ MainWindow::openFile( const QString & path )
 
 	d->editor->setPlainText( f.readAll() );
 	f.close();
-	setWindowTitle( MainWindow::tr( "%1[*] - Markdown Editor" )
-		.arg( QFileInfo( d->editor->docName() ).fileName() ) );
+	setWindowTitle( tr( "%1[*] - Markdown Editor%2" )
+		.arg( QFileInfo( d->editor->docName() ).fileName(),
+			d->previewMode ? tr( " [Preview Mode]" ) : QString() ) );
 	d->editor->setFocus();
 	d->editor->document()->clearUndoRedoStacks();
 	onCursorPositionChanged();
 	d->loadAllAction->setEnabled( true );
 	d->rootFilePath = path;
 	closeAllLinkedFiles();
+}
+
+void
+MainWindow::openInPreviewMode( bool loadAllLinked )
+{
+	d->previewMode = true;
+	d->loadAllFlag = loadAllLinked;
+
+	if( d->loadAllFlag )
+	{
+		readAllLinked();
+
+		d->loadAllAction->setText( tr( "Show Only Current File..." ) );
+	}
+	else
+		onTextChanged();
+
+	d->settingsMenu->menuAction()->setVisible( false );
+	d->editMenuAction->setVisible( false );
+	d->saveAction->setVisible( false );
+	d->saveAction->setEnabled( false );
+	d->saveAsAction->setVisible( false );
+	d->saveAsAction->setEnabled( false );
+	d->newAction->setVisible( false );
+	d->newAction->setEnabled( false );
+	d->editor->setVisible( false );
+	d->splitter->handle( 1 )->setEnabled( false );
+	d->splitter->handle( 1 )->setVisible( false );
+
+	setWindowTitle( tr( "%1[*] - Markdown Editor [Preview Mode]" )
+		.arg( QFileInfo( d->editor->docName() ).fileName() ) );
 }
 
 bool
@@ -846,9 +883,9 @@ struct Node {
 }
 
 void
-MainWindow::onLoadAllLinkedFiles()
+MainWindow::loadAllLinkedFiles()
 {
-	if( isModified() )
+	if( isModified() && !d->previewMode )
 	{
 		QMessageBox::information( this, windowTitle(),
 			tr( "You have unsaved changes. Please save document first." ) );
@@ -865,105 +902,122 @@ MainWindow::onLoadAllLinkedFiles()
 		return;
 	}
 
+	if( d->loadAllFlag && d->previewMode )
+	{
+		d->loadAllAction->setText( tr( "Load All Linked Files..." ) );
+
+		d->loadAllFlag = false;
+
+		onTextChanged();
+
+		return;
+	}
+
 	d->loadAllFlag = true;
 
 	readAllLinked();
 
-	if( !d->fileTreeDock )
+	if( d->previewMode )
+		d->loadAllAction->setText( tr( "Show Only Current File..." ) );
+
+	if( !d->previewMode )
 	{
-		d->fileTreeDock = new QDockWidget( tr( "Navigation" ), this );
-		d->fileTreeDock->setFeatures( QDockWidget::NoDockWidgetFeatures );
-	}
-
-	if( !d->fileTree )
-	{
-		d->fileTree = new QTreeWidget( d->fileTreeDock );
-		d->fileTreeDock->setWidget( d->fileTree );
-		d->fileTree->setHeaderHidden( true );
-	}
-
-	const auto rootFolder = QFileInfo( d->rootFilePath ).absolutePath() + QStringLiteral( "/" );
-
-	Node root;
-
-	for( auto it = d->mdDoc->items().cbegin(), last = d->mdDoc->items().cend(); it != last; ++it )
-	{
-		if( (*it)->type() == MD::ItemType::Anchor )
+		if( !d->fileTreeDock )
 		{
-			const auto fullFileName =
-				static_cast< MD::Anchor< MD::QStringTrait >* > ( it->get() )->label();
+			d->fileTreeDock = new QDockWidget( tr( "Navigation" ), this );
+			d->fileTreeDock->setFeatures( QDockWidget::NoDockWidgetFeatures );
+		}
 
-			const auto fileName = fullFileName.startsWith( rootFolder ) ?
-				fullFileName.sliced( rootFolder.size() ) : fullFileName;
+		if( !d->fileTree )
+		{
+			d->fileTree = new QTreeWidget( d->fileTreeDock );
+			d->fileTreeDock->setWidget( d->fileTree );
+			d->fileTree->setHeaderHidden( true );
+		}
 
-			const auto parts = fileName.split( QStringLiteral( "/" ) );
+		const auto rootFolder = QFileInfo( d->rootFilePath ).absolutePath() + QStringLiteral( "/" );
 
-			Node * current = &root;
+		Node root;
 
-			for( qsizetype i = 0; i < parts.size(); ++i )
+		for( auto it = d->mdDoc->items().cbegin(), last = d->mdDoc->items().cend(); it != last; ++it )
+		{
+			if( (*it)->type() == MD::ItemType::Anchor )
 			{
-				const QString f = parts.at( i ).isEmpty() ? QStringLiteral( "/" ) : parts.at( i );
+				const auto fullFileName =
+					static_cast< MD::Anchor< MD::QStringTrait >* > ( it->get() )->label();
 
-				if( i == parts.size() - 1 )
+				const auto fileName = fullFileName.startsWith( rootFolder ) ?
+					fullFileName.sliced( rootFolder.size() ) : fullFileName;
+
+				const auto parts = fileName.split( QStringLiteral( "/" ) );
+
+				Node * current = &root;
+
+				for( qsizetype i = 0; i < parts.size(); ++i )
 				{
-					if( !current->keys.contains( f ) )
+					const QString f = parts.at( i ).isEmpty() ? QStringLiteral( "/" ) : parts.at( i );
+
+					if( i == parts.size() - 1 )
 					{
-						auto tmp = QSharedPointer< Node >::create();
-						auto item = new QTreeWidgetItem( current->self );
-						item->setIcon( 0, QIcon( ":/res/img/icon_16x16.png" ) );
-						item->setData( 0, Qt::UserRole, fullFileName );
-						tmp->self = item;
-						item->setText( 0, f );
-						current->children.push_back( { tmp, item } );
-						current->keys.push_back( f );
-						current = tmp.get();
-					}
-				}
-				else
-				{
-					if( !current->keys.contains( f ) )
-					{
-						auto tmp = QSharedPointer< Node >::create();
-						auto item = new QTreeWidgetItem( current->self );
-						item->setIcon( 0, QIcon( ":/res/img/folder-yellow.png" ) );
-						tmp->self = item;
-						item->setText( 0, f );
-						current->children.push_back( { tmp, item } );
-						current->keys.push_back( f );
-						current = tmp.get();
+						if( !current->keys.contains( f ) )
+						{
+							auto tmp = QSharedPointer< Node >::create();
+							auto item = new QTreeWidgetItem( current->self );
+							item->setIcon( 0, QIcon( ":/res/img/icon_16x16.png" ) );
+							item->setData( 0, Qt::UserRole, fullFileName );
+							tmp->self = item;
+							item->setText( 0, f );
+							current->children.push_back( { tmp, item } );
+							current->keys.push_back( f );
+							current = tmp.get();
+						}
 					}
 					else
-						current = current->children.at( current->keys.indexOf( f ) ).first.get();
+					{
+						if( !current->keys.contains( f ) )
+						{
+							auto tmp = QSharedPointer< Node >::create();
+							auto item = new QTreeWidgetItem( current->self );
+							item->setIcon( 0, QIcon( ":/res/img/folder-yellow.png" ) );
+							tmp->self = item;
+							item->setText( 0, f );
+							current->children.push_back( { tmp, item } );
+							current->keys.push_back( f );
+							current = tmp.get();
+						}
+						else
+							current = current->children.at( current->keys.indexOf( f ) ).first.get();
+					}
 				}
 			}
 		}
+
+		if( root.children.size() > 1 )
+		{
+			for( auto it = root.children.cbegin(), last = root.children.cend(); it != last; ++it )
+				d->fileTree->addTopLevelItem( it->second );
+
+			connect( d->fileTree, &QTreeWidget::itemDoubleClicked,
+				this, &MainWindow::onNavigationDoubleClicked );
+
+			addDockWidget( Qt::LeftDockWidgetArea, d->fileTreeDock );
+
+			d->loadAllAction->setText( tr( "Show Only Current File..." ) );
+
+			QMessageBox::information( this, windowTitle(),
+				tr( "HTML preview is ready. Modifications in files will not update "
+					"HTML preview till you save changes." ) );
+		}
+		else
+		{
+			closeAllLinkedFiles();
+
+			QMessageBox::information( this, windowTitle(),
+				tr( "This document doesn't have linked documents." ) );
+		}
+
+		d->editor->setFocus();
 	}
-
-	if( root.children.size() > 1 )
-	{
-		for( auto it = root.children.cbegin(), last = root.children.cend(); it != last; ++it )
-			d->fileTree->addTopLevelItem( it->second );
-
-		connect( d->fileTree, &QTreeWidget::itemDoubleClicked,
-			this, &MainWindow::onNavigationDoubleClicked );
-
-		addDockWidget( Qt::LeftDockWidgetArea, d->fileTreeDock );
-
-		d->loadAllAction->setText( tr( "Show Only Current File..." ) );
-
-		QMessageBox::information( this, windowTitle(),
-			tr( "HTML preview is ready. Modifications in files will not update "
-				"HTML preview till you save changes." ) );
-	}
-	else
-	{
-		closeAllLinkedFiles();
-
-		QMessageBox::information( this, windowTitle(),
-			tr( "This document doesn't have linked documents." ) );
-	}
-
-	d->editor->setFocus();
 }
 
 void
