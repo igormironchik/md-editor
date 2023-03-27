@@ -76,7 +76,6 @@ private slots:
 	void onToolHide();
 	void onCursorPositionChanged();
 	void onEditMenuActionTriggered( QAction * action );
-	void closeAllLinkedFiles();
 	void onNavigationDoubleClicked( QTreeWidgetItem * item, int column );
 
 private:
@@ -87,6 +86,7 @@ private:
 	void readAllLinked();
 	void updateWindowTitle();
 	void updateLoadAllLinkedFilesMenuText();
+	void closeAllLinkedFiles();
 
 private:
 	Q_DISABLE_COPY( MainWindow )
