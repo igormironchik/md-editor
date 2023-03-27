@@ -118,7 +118,7 @@ struct MainWindowPrivate {
 		editor->setDocName( QStringLiteral( "default.md" ) );
 		page->setHtml( q->htmlContent(), baseUrl );
 
-		q->setWindowTitle( MainWindow::tr( "%1[*] - Markdown Editor" ).arg( editor->docName() ) );
+		q->updateWindowTitle();
 
 		auto fileMenu = q->menuBar()->addMenu( MainWindow::tr( "&File" ) );
 		newAction = fileMenu->addAction( QIcon( QStringLiteral( ":/res/img/document-new.png" ) ),
@@ -305,9 +305,7 @@ MainWindow::openFile( const QString & path )
 
 	d->editor->setPlainText( f.readAll() );
 	f.close();
-	setWindowTitle( tr( "%1[*] - Markdown Editor%2" )
-		.arg( QFileInfo( d->editor->docName() ).fileName(),
-			d->previewMode ? tr( " [Preview Mode]" ) : QString() ) );
+	updateWindowTitle();
 	d->editor->setFocus();
 	d->editor->document()->clearUndoRedoStacks();
 	onCursorPositionChanged();
@@ -343,8 +341,7 @@ MainWindow::openInPreviewMode( bool loadAllLinked )
 	d->splitter->handle( 1 )->setEnabled( false );
 	d->splitter->handle( 1 )->setVisible( false );
 
-	setWindowTitle( tr( "%1[*] - Markdown Editor [Preview Mode]" )
-		.arg( QFileInfo( d->editor->docName() ).fileName() ) );
+	updateWindowTitle();
 }
 
 bool
@@ -370,7 +367,7 @@ MainWindow::onFileNew()
 	d->editor->setPlainText( "" );
 	d->editor->document()->setModified( false );
 	d->editor->document()->clearUndoRedoStacks();
-	setWindowTitle( MainWindow::tr( "%1[*] - Markdown Editor" ).arg( d->editor->docName() ) );
+	updateWindowTitle();
 	d->baseUrl = QString( "file:%1/" ).arg(
 		QStandardPaths::standardLocations( QStandardPaths::HomeLocation ).first() );
 	d->page->setHtml( htmlContent(), d->baseUrl );
@@ -427,8 +424,7 @@ MainWindow::onFileSave()
 
 	d->editor->document()->setModified( false );
 
-	setWindowTitle( MainWindow::tr( "%1[*] - Markdown Editor" )
-		.arg( QFileInfo( d->editor->docName() ).fileName() ) );
+	updateWindowTitle();
 
 	readAllLinked();
 }
@@ -1085,14 +1081,21 @@ MainWindow::onNavigationDoubleClicked( QTreeWidgetItem * item, int )
 		d->editor->setPlainText( f.readAll() );
 		f.close();
 
-		setWindowTitle( MainWindow::tr( "%1[*] - Markdown Editor" )
-			.arg( QFileInfo( d->editor->docName() ).fileName() ) );
+		updateWindowTitle();
 
 		d->editor->document()->clearUndoRedoStacks();
 		d->editor->setFocus();
 
 		onCursorPositionChanged();
 	}
+}
+
+void
+MainWindow::updateWindowTitle()
+{
+	setWindowTitle( tr( "%1[*] - Markdown Editor%2" )
+		.arg( QFileInfo( d->editor->docName() ).fileName(),
+			d->previewMode ? tr( " [Preview Mode]" ) : QString() ) );
 }
 
 } /* namespace MdEditor */

@@ -85,6 +85,7 @@ private:
 	void saveCfg() const;
 	void readCfg();
 	void readAllLinked();
+	void updateWindowTitle();
 
 private:
 	Q_DISABLE_COPY( MainWindow )
