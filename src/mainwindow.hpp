@@ -26,6 +26,10 @@
 #include <QMainWindow>
 #include <QScopedPointer>
 
+QT_BEGIN_NAMESPACE
+class QTreeWidgetItem;
+QT_END_NAMESPACE
+
 
 namespace MdEditor {
 
@@ -69,12 +73,16 @@ private slots:
 	void onToolHide();
 	void onCursorPositionChanged();
 	void onEditMenuActionTriggered( QAction * action );
+	void onLoadAllLinkedFiles();
+	void closeAllLinkedFiles();
+	void onNavigationDoubleClicked( QTreeWidgetItem * item, int column );
 
 private:
     bool isModified() const;
 	QString htmlContent() const;
 	void saveCfg() const;
 	void readCfg();
+	void readAllLinked();
 
 private:
 	Q_DISABLE_COPY( MainWindow )
