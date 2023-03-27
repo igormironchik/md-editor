@@ -312,6 +312,7 @@ MainWindow::openFile( const QString & path )
 	d->loadAllAction->setEnabled( true );
 	d->rootFilePath = path;
 	closeAllLinkedFiles();
+	updateLoadAllLinkedFilesMenuText();
 }
 
 void
@@ -321,13 +322,11 @@ MainWindow::openInPreviewMode( bool loadAllLinked )
 	d->loadAllFlag = loadAllLinked;
 
 	if( d->loadAllFlag )
-	{
 		readAllLinked();
-
-		d->loadAllAction->setText( tr( "Show Only Current File..." ) );
-	}
 	else
 		onTextChanged();
+
+	updateLoadAllLinkedFilesMenuText();
 
 	d->settingsMenu->menuAction()->setVisible( false );
 	d->editMenuAction->setVisible( false );
@@ -375,6 +374,7 @@ MainWindow::onFileNew()
 	d->loadAllAction->setEnabled( false );
 	d->rootFilePath.clear();
 	closeAllLinkedFiles();
+	updateLoadAllLinkedFilesMenuText();
 }
 
 void
@@ -451,6 +451,8 @@ MainWindow::onFileSaveAs()
 	d->page->setHtml( htmlContent(), d->baseUrl );
 
 	closeAllLinkedFiles();
+
+	updateLoadAllLinkedFilesMenuText();
 }
 
 void
@@ -895,14 +897,16 @@ MainWindow::loadAllLinkedFiles()
 	{
 		closeAllLinkedFiles();
 
+		updateLoadAllLinkedFilesMenuText();
+
 		return;
 	}
 
 	if( d->loadAllFlag && d->previewMode )
 	{
-		d->loadAllAction->setText( tr( "Load All Linked Files..." ) );
-
 		d->loadAllFlag = false;
+
+		updateLoadAllLinkedFilesMenuText();
 
 		onTextChanged();
 
@@ -912,9 +916,6 @@ MainWindow::loadAllLinkedFiles()
 	d->loadAllFlag = true;
 
 	readAllLinked();
-
-	if( d->previewMode )
-		d->loadAllAction->setText( tr( "Show Only Current File..." ) );
 
 	if( !d->previewMode )
 	{
@@ -998,7 +999,7 @@ MainWindow::loadAllLinkedFiles()
 
 			addDockWidget( Qt::LeftDockWidgetArea, d->fileTreeDock );
 
-			d->loadAllAction->setText( tr( "Show Only Current File..." ) );
+			d->loadAllFlag = true;
 
 			QMessageBox::information( this, windowTitle(),
 				tr( "HTML preview is ready. Modifications in files will not update "
@@ -1014,14 +1015,14 @@ MainWindow::loadAllLinkedFiles()
 
 		d->editor->setFocus();
 	}
+
+	updateLoadAllLinkedFilesMenuText();
 }
 
 void
 MainWindow::closeAllLinkedFiles()
 {
 	d->loadAllFlag = false;
-
-	d->loadAllAction->setText( tr( "Load All Linked Files..." ) );
 
 	if( d->fileTreeDock )
 	{
@@ -1096,6 +1097,15 @@ MainWindow::updateWindowTitle()
 	setWindowTitle( tr( "%1[*] - Markdown Editor%2" )
 		.arg( QFileInfo( d->editor->docName() ).fileName(),
 			d->previewMode ? tr( " [Preview Mode]" ) : QString() ) );
+}
+
+void
+MainWindow::updateLoadAllLinkedFilesMenuText()
+{
+	if( d->loadAllFlag )
+		d->loadAllAction->setText( tr( "Show Only Current File..." ) );
+	else
+		d->loadAllAction->setText( tr( "Load All Linked Files..." ) );
 }
 
 } /* namespace MdEditor */

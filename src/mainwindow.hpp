@@ -86,6 +86,7 @@ private:
 	void readCfg();
 	void readAllLinked();
 	void updateWindowTitle();
+	void updateLoadAllLinkedFilesMenuText();
 
 private:
 	Q_DISABLE_COPY( MainWindow )
