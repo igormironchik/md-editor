@@ -151,6 +151,14 @@ struct MainWindowPrivate {
 		toggleGoToLineAction->setShortcut( MainWindow::tr( "Ctrl+L" ) );
 		q->addAction( toggleGoToLineAction );
 
+		auto viewMenu = q->menuBar()->addMenu( MainWindow::tr( "&View" ) );
+		viewAction = new QAction( QIcon( QStringLiteral( ":/res/img/view-preview.png" ) ),
+			MainWindow::tr( "Toggle Preview Mode" ) );
+		viewAction->setShortcut( MainWindow::tr( "Ctrl+P" ) );
+		viewAction->setCheckable( true );
+		viewAction->setChecked( false );
+		viewMenu->addAction( viewAction );
+
 		settingsMenu = q->menuBar()->addMenu( MainWindow::tr( "&Settings" ) );
 		auto toggleLineNumbersAction = new QAction(
 			QIcon( QStringLiteral( ":/res/img/view-table-of-contents-ltr.png" ) ),
@@ -214,6 +222,8 @@ struct MainWindowPrivate {
 			} );
 		QObject::connect( editor, &QPlainTextEdit::cursorPositionChanged,
 			q, &MainWindow::onCursorPositionChanged );
+		QObject::connect( viewAction, &QAction::toggled,
+			q, &MainWindow::onTogglePreviewAction );
 
 		q->readCfg();
 
@@ -238,6 +248,7 @@ struct MainWindowPrivate {
 	QAction * toggleGoToLineAction = nullptr;
 	QAction * editMenuAction = nullptr;
 	QAction * loadAllAction = nullptr;
+	QAction * viewAction = nullptr;
 	QMenu * standardEditMenu = nullptr;
 	QMenu * settingsMenu = nullptr;
 	QDockWidget * fileTreeDock = nullptr;
@@ -318,29 +329,9 @@ MainWindow::openFile( const QString & path )
 void
 MainWindow::openInPreviewMode( bool loadAllLinked )
 {
-	d->previewMode = true;
 	d->loadAllFlag = loadAllLinked;
 
-	if( d->loadAllFlag )
-		readAllLinked();
-	else
-		onTextChanged();
-
-	updateLoadAllLinkedFilesMenuText();
-
-	d->settingsMenu->menuAction()->setVisible( false );
-	d->editMenuAction->setVisible( false );
-	d->saveAction->setVisible( false );
-	d->saveAction->setEnabled( false );
-	d->saveAsAction->setVisible( false );
-	d->saveAsAction->setEnabled( false );
-	d->newAction->setVisible( false );
-	d->newAction->setEnabled( false );
-	d->editor->setVisible( false );
-	d->splitter->handle( 1 )->setEnabled( false );
-	d->splitter->handle( 1 )->setVisible( false );
-
-	updateWindowTitle();
+	d->viewAction->setChecked( true );
 }
 
 bool
@@ -881,7 +872,7 @@ struct Node {
 }
 
 void
-MainWindow::loadAllLinkedFiles()
+MainWindow::loadAllLinkedFiles( bool doNotCloseDock )
 {
 	if( isModified() && !d->previewMode )
 	{
@@ -893,18 +884,9 @@ MainWindow::loadAllLinkedFiles()
 		return;
 	}
 
-	if( d->fileTreeDock )
+	if( !doNotCloseDock && d->fileTreeDock )
 	{
 		closeAllLinkedFiles();
-
-		updateLoadAllLinkedFilesMenuText();
-
-		return;
-	}
-
-	if( d->loadAllFlag && d->previewMode )
-	{
-		d->loadAllFlag = false;
 
 		updateLoadAllLinkedFilesMenuText();
 
@@ -917,21 +899,25 @@ MainWindow::loadAllLinkedFiles()
 
 	readAllLinked();
 
-	if( !d->previewMode )
+	bool init = false;
+
+	if( !d->fileTreeDock )
 	{
-		if( !d->fileTreeDock )
-		{
-			d->fileTreeDock = new QDockWidget( tr( "Navigation" ), this );
-			d->fileTreeDock->setFeatures( QDockWidget::NoDockWidgetFeatures );
-		}
+		init = true;
 
-		if( !d->fileTree )
-		{
-			d->fileTree = new QTreeWidget( d->fileTreeDock );
-			d->fileTreeDock->setWidget( d->fileTree );
-			d->fileTree->setHeaderHidden( true );
-		}
+		d->fileTreeDock = new QDockWidget( tr( "Navigation" ), this );
+		d->fileTreeDock->setFeatures( QDockWidget::NoDockWidgetFeatures );
+	}
 
+	if( !d->fileTree )
+	{
+		d->fileTree = new QTreeWidget( d->fileTreeDock );
+		d->fileTreeDock->setWidget( d->fileTree );
+		d->fileTree->setHeaderHidden( true );
+	}
+
+	if( init )
+	{
 		const auto rootFolder = QFileInfo( d->rootFilePath ).absolutePath() + QStringLiteral( "/" );
 
 		Node root;
@@ -997,13 +983,14 @@ MainWindow::loadAllLinkedFiles()
 			connect( d->fileTree, &QTreeWidget::itemDoubleClicked,
 				this, &MainWindow::onNavigationDoubleClicked );
 
-			addDockWidget( Qt::LeftDockWidgetArea, d->fileTreeDock );
+			if( !d->previewMode )
+			{
+				addDockWidget( Qt::LeftDockWidgetArea, d->fileTreeDock );
 
-			d->loadAllFlag = true;
-
-			QMessageBox::information( this, windowTitle(),
-				tr( "HTML preview is ready. Modifications in files will not update "
-					"HTML preview till you save changes." ) );
+				QMessageBox::information( this, windowTitle(),
+					tr( "HTML preview is ready. Modifications in files will not update "
+						"HTML preview till you save changes." ) );
+			}
 		}
 		else
 		{
@@ -1012,9 +999,10 @@ MainWindow::loadAllLinkedFiles()
 			QMessageBox::information( this, windowTitle(),
 				tr( "This document doesn't have linked documents." ) );
 		}
-
-		d->editor->setFocus();
 	}
+
+	if( !d->previewMode )
+		d->editor->setFocus();
 
 	updateLoadAllLinkedFilesMenuText();
 }
@@ -1106,6 +1094,64 @@ MainWindow::updateLoadAllLinkedFilesMenuText()
 		d->loadAllAction->setText( tr( "Show Only Current File..." ) );
 	else
 		d->loadAllAction->setText( tr( "Load All Linked Files..." ) );
+}
+
+void
+MainWindow::onTogglePreviewAction( bool checked )
+{
+	d->previewMode = checked;
+
+	if( d->loadAllFlag )
+		loadAllLinkedFiles( true );
+	else
+		onTextChanged();
+
+	if( checked )
+	{
+		d->settingsMenu->menuAction()->setVisible( false );
+		d->editMenuAction->setVisible( false );
+		d->saveAction->setVisible( false );
+		d->saveAction->setEnabled( false );
+		d->saveAsAction->setVisible( false );
+		d->saveAsAction->setEnabled( false );
+		d->newAction->setVisible( false );
+		d->newAction->setEnabled( false );
+		d->editor->setVisible( false );
+		d->splitter->handle( 1 )->setEnabled( false );
+		d->splitter->handle( 1 )->setVisible( false );
+		d->splitter->setSizes( { 0, centralWidget()->width() } );
+
+		if( d->fileTreeDock )
+			removeDockWidget( d->fileTreeDock );
+	}
+	else
+	{
+		d->settingsMenu->menuAction()->setVisible( true );
+		d->editMenuAction->setVisible( true );
+		d->saveAction->setVisible( true );
+		d->saveAction->setEnabled( true );
+		d->saveAsAction->setVisible( true );
+		d->saveAsAction->setEnabled( true );
+		d->newAction->setVisible( true );
+		d->newAction->setEnabled( true );
+		d->editor->setVisible( true );
+		d->splitter->handle( 1 )->setEnabled( true );
+		d->splitter->handle( 1 )->setVisible( true );
+		const auto w = centralWidget()->width() / 2;
+		d->splitter->setSizes( { w, w } );
+
+		if( d->fileTreeDock )
+		{
+			addDockWidget( Qt::LeftDockWidgetArea, d->fileTreeDock );
+			d->fileTreeDock->show();
+		}
+
+		d->editor->setFocus();
+	}
+
+	updateLoadAllLinkedFilesMenuText();
+
+	updateWindowTitle();
 }
 
 } /* namespace MdEditor */

@@ -52,7 +52,7 @@ public:
 public slots:
 	void openFile( const QString & path );
 	void openInPreviewMode( bool loadAllLinked );
-	void loadAllLinkedFiles();
+	void loadAllLinkedFiles( bool doNotCloseDock = false );
 
 protected:
 	void resizeEvent( QResizeEvent * e ) override;
@@ -77,6 +77,7 @@ private slots:
 	void onCursorPositionChanged();
 	void onEditMenuActionTriggered( QAction * action );
 	void onNavigationDoubleClicked( QTreeWidgetItem * item, int column );
+	void onTogglePreviewAction( bool checked );
 
 private:
     bool isModified() const;
