@@ -18,6 +18,8 @@ When you cloned repository don't forget to update submodules!
 Build process is quite easy, just use `QtCreator` to open `CMakeLists.txt` and build in IDE, or use
 `CMake` from shell.
 
-# Screenshot
+# Screenshots
 
-![md-editor](md-editor.png)
+![md-editor](md-editor-edit-mode.png)
+
+![md-editor](md-editor-view-mode.png)
