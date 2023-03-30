@@ -25,6 +25,7 @@
 #include <QApplication>
 #include <QScreen>
 #include <QCommandLineParser>
+#include <QWebEngineUrlScheme>
 
 // md-editor include.
 #include "mainwindow.hpp"
@@ -32,6 +33,11 @@
 
 int main( int argc, char ** argv )
 {
+	QWebEngineUrlScheme qrc( "qrc" );
+	qrc.setFlags( QWebEngineUrlScheme::CorsEnabled );
+	qrc.setSyntax( QWebEngineUrlScheme::Syntax::Path );
+	QWebEngineUrlScheme::registerScheme( qrc );
+
 	QApplication app( argc, argv );
 
 	QCommandLineParser parser;
