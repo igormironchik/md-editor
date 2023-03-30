@@ -9,6 +9,8 @@ And one feature - this application can load all linked Markdown files from root
 document to preview all, for example, GitHub Markdown pages as one HTML book,
 this is quite usefull.
 
+And a cherry on the cake - LaTeX Math injections are rendered in preview. Look at the screenshots.
+
 Thanks.
 
 # Building
@@ -23,3 +25,5 @@ Build process is quite easy, just use `QtCreator` to open `CMakeLists.txt` and b
 ![md-editor](md-editor-edit-mode.png)
 
 ![md-editor](md-editor-view-mode.png)
+
+![md-editor](md-editor-latext-math.png)
