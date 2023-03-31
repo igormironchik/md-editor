@@ -79,6 +79,7 @@ private slots:
 	void onNavigationDoubleClicked( QTreeWidgetItem * item, int column );
 	void onTogglePreviewAction( bool checked );
 	void onShowLicenses();
+	void onConvertToPdf();
 
 private:
     bool isModified() const;

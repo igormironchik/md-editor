@@ -53,6 +53,7 @@
 #include <QApplication>
 #include <QDockWidget>
 #include <QTreeWidget>
+#include <QProcess>
 
 // md4qt include.
 #define MD4QT_QT_SUPPORT
@@ -123,6 +124,10 @@ struct MainWindowPrivate {
 
 		q->updateWindowTitle();
 
+		QDir workingDir( QApplication::applicationDirPath() );
+		const auto files = workingDir.entryInfoList( { QStringLiteral( "md-pdf-gui" ) },
+			QDir::Executable | QDir::Files );
+
 		auto fileMenu = q->menuBar()->addMenu( MainWindow::tr( "&File" ) );
 		newAction = fileMenu->addAction( QIcon( QStringLiteral( ":/res/img/document-new.png" ) ),
 				MainWindow::tr( "New" ), MainWindow::tr( "Ctrl+N" ), q, &MainWindow::onFileNew );
@@ -137,6 +142,17 @@ struct MainWindowPrivate {
 		loadAllAction = fileMenu->addAction( MainWindow::tr( "Load All Linked Files..." ),
 			MainWindow::tr( "Ctrl+R" ), q, &MainWindow::loadAllLinkedFiles );
 		loadAllAction->setEnabled( false );
+
+		if( !files.isEmpty() )
+		{
+			fileMenu->addSeparator();
+
+			convertToPdfAction = fileMenu->addAction( MainWindow::tr( "Convert To PDF..." ),
+				q, &MainWindow::onConvertToPdf );
+
+			convertToPdfAction->setEnabled( false );
+		}
+
 		fileMenu->addSeparator();
 		fileMenu->addAction( QIcon( QStringLiteral( ":/res/img/application-exit.png" ) ),
 			MainWindow::tr( "Quit" ), MainWindow::tr( "Ctrl+Q" ), q, &QWidget::close );
@@ -254,6 +270,7 @@ struct MainWindowPrivate {
 	QAction * editMenuAction = nullptr;
 	QAction * loadAllAction = nullptr;
 	QAction * viewAction = nullptr;
+	QAction * convertToPdfAction = nullptr;
 	QMenu * standardEditMenu = nullptr;
 	QMenu * settingsMenu = nullptr;
 	QDockWidget * fileTreeDock = nullptr;
@@ -283,6 +300,20 @@ MainWindow::~MainWindow()
 		d->standardEditMenu->deleteLater();
 
 	d->standardEditMenu = nullptr;
+}
+
+void
+MainWindow::onConvertToPdf()
+{
+	QDir workingDir( QApplication::applicationDirPath() );
+	const auto files = workingDir.entryInfoList( { QStringLiteral( "md-pdf-gui" ) },
+		QDir::Executable | QDir::Files );
+
+	if( !files.isEmpty() )
+	{
+		QProcess::startDetached( files.at( 0 ).absoluteFilePath(),
+			{ d->rootFilePath }, workingDir.absolutePath() );
+	}
 }
 
 void
@@ -327,6 +358,10 @@ MainWindow::openFile( const QString & path )
 	onCursorPositionChanged();
 	d->loadAllAction->setEnabled( true );
 	d->rootFilePath = path;
+
+	if( d->convertToPdfAction )
+		d->convertToPdfAction->setEnabled( true );
+
 	closeAllLinkedFiles();
 	updateLoadAllLinkedFilesMenuText();
 }
@@ -369,6 +404,10 @@ MainWindow::onFileNew()
 	onCursorPositionChanged();
 	d->loadAllAction->setEnabled( false );
 	d->rootFilePath.clear();
+
+	if( d->convertToPdfAction )
+		d->convertToPdfAction->setEnabled( false );
+
 	closeAllLinkedFiles();
 	updateLoadAllLinkedFilesMenuText();
 }
@@ -441,6 +480,9 @@ MainWindow::onFileSaveAs()
 	d->baseUrl = QString( "file:%1/" ).arg( QFileInfo( d->editor->docName() )
 		.absoluteDir().absolutePath() );
 	d->rootFilePath = d->editor->docName();
+
+	if( d->convertToPdfAction )
+		d->convertToPdfAction->setEnabled( true );
 
 	onFileSave();
 
