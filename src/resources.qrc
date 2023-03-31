@@ -26,21 +26,7 @@
         <file>res/css/github-markdown.css</file>
         <file>res/highlight.min.js</file>
         <file>res/css/default.min.css</file>
-        <file>res/katex/contrib/auto-render.js</file>
         <file>res/katex/contrib/auto-render.min.js</file>
-        <file>res/katex/contrib/auto-render.mjs</file>
-        <file>res/katex/contrib/copy-tex.js</file>
-        <file>res/katex/contrib/copy-tex.min.js</file>
-        <file>res/katex/contrib/copy-tex.mjs</file>
-        <file>res/katex/contrib/mathtex-script-type.js</file>
-        <file>res/katex/contrib/mathtex-script-type.min.js</file>
-        <file>res/katex/contrib/mathtex-script-type.mjs</file>
-        <file>res/katex/contrib/mhchem.js</file>
-        <file>res/katex/contrib/mhchem.min.js</file>
-        <file>res/katex/contrib/mhchem.mjs</file>
-        <file>res/katex/contrib/render-a11y-string.js</file>
-        <file>res/katex/contrib/render-a11y-string.min.js</file>
-        <file>res/katex/contrib/render-a11y-string.mjs</file>
         <file>res/katex/fonts/KaTeX_AMS-Regular.ttf</file>
         <file>res/katex/fonts/KaTeX_AMS-Regular.woff</file>
         <file>res/katex/fonts/KaTeX_AMS-Regular.woff2</file>
@@ -101,11 +87,8 @@
         <file>res/katex/fonts/KaTeX_Typewriter-Regular.ttf</file>
         <file>res/katex/fonts/KaTeX_Typewriter-Regular.woff</file>
         <file>res/katex/fonts/KaTeX_Typewriter-Regular.woff2</file>
-        <file>res/katex/katex.css</file>
-        <file>res/katex/katex.js</file>
         <file>res/katex/katex.min.css</file>
         <file>res/katex/katex.min.js</file>
-        <file>res/katex/katex.mjs</file>
         <file>res/katex/README.md</file>
     </qresource>
 </RCC>
