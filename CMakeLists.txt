@@ -19,8 +19,11 @@ set( CMAKE_CXX_STANDARD 17 )
 
 set( CMAKE_CXX_STANDARD_REQUIRED ON )
 
-set( BUILD_MD4QT_TESTS OFF CACHE INTERNAL "" FORCE )
+set( BUILD_MD4QT_QT_TESTS OFF CACHE INTERNAL "" FORCE )
 add_subdirectory( 3rdparty/md4qt )
+
+set( BUILD_WIDGETS_EXAMPLES OFF CACHE INTERNAL "" FORCE )
+add_subdirectory( 3rdparty/widgets )
 
 add_subdirectory( 3rdparty/cfgfile/generator )
 add_subdirectory( src )

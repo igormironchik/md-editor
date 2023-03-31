@@ -50,10 +50,11 @@ add_definitions( -DCFGFILE_QT_SUPPORT )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}
 	${md4qt_INCLUDE_DIRECTORIES}
 	${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/cfgfile
-	${CMAKE_CURRENT_BINARY_DIR} )
+	${CMAKE_CURRENT_BINARY_DIR}
+	${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/widgets/include )
 
 add_executable( md-editor WIN32 ${SRC} )
 
 add_dependencies( md-editor cfgfile.generator )
 
-target_link_libraries( md-editor Qt6::WebEngineWidgets Qt6::Widgets Qt6::Core )
+target_link_libraries( md-editor widgets Qt6::WebEngineWidgets Qt6::Widgets Qt6::Core )

@@ -78,6 +78,7 @@ private slots:
 	void onEditMenuActionTriggered( QAction * action );
 	void onNavigationDoubleClicked( QTreeWidgetItem * item, int column );
 	void onTogglePreviewAction( bool checked );
+	void onShowLicenses();
 
 private:
     bool isModified() const;
