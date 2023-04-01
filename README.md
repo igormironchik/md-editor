@@ -11,6 +11,10 @@ this is quite usefull.
 
 And a cherry on the cake - LaTeX Math injections are rendered in preview. Look at the screenshots.
 
+One more, guys, you can convert your Markdown document into PDF from the `File` menu. To activate
+this option you need to place `md-pdf-gui` executable in the same folder with `md-editor`
+executable. Sources of `md-pdf-gui` you can get [here](https://github.com/igormironchik/md-pdf).
+
 Thanks.
 
 # Building
