@@ -17,6 +17,10 @@ executable. Sources of `md-pdf-gui` you can get [here](https://github.com/igormi
 
 Thanks.
 
+# Installers
+
+You can get `x64` installers for `Linux` and `Windows` [here](https://github.com/igormironchik/markdown).
+
 # Building
 
 When you cloned repository don't forget to update submodules!
