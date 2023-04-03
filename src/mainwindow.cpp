@@ -125,7 +125,7 @@ struct MainWindowPrivate {
 		q->updateWindowTitle();
 
 		QDir workingDir( QApplication::applicationDirPath() );
-		const auto files = workingDir.entryInfoList( { QStringLiteral( "md-pdf-gui" ) },
+		const auto files = workingDir.entryInfoList( { QStringLiteral( "md-pdf-gui*" ) },
 			QDir::Executable | QDir::Files );
 
 		auto fileMenu = q->menuBar()->addMenu( MainWindow::tr( "&File" ) );
@@ -306,7 +306,7 @@ void
 MainWindow::onConvertToPdf()
 {
 	QDir workingDir( QApplication::applicationDirPath() );
-	const auto files = workingDir.entryInfoList( { QStringLiteral( "md-pdf-gui" ) },
+	const auto files = workingDir.entryInfoList( { QStringLiteral( "md-pdf-gui*" ) },
 		QDir::Executable | QDir::Files );
 
 	if( !files.isEmpty() )
