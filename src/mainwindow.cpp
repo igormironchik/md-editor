@@ -608,7 +608,8 @@ MainWindow::onTextChanged()
 
 		d->mdDoc = parser.parse( stream, d->editor->docName() );
 
-		d->html->setText( MD::toHtml( d->mdDoc, false ) );
+		d->html->setText( MD::toHtml( d->mdDoc, false,
+			QStringLiteral( "qrc:/res/img/go-jump.png" ) ) );
 	}
 }
 
@@ -1093,7 +1094,8 @@ MainWindow::readAllLinked()
 		d->mdDoc = parser.parse( d->rootFilePath, true,
 			{ QStringLiteral( "md" ), QStringLiteral( "mkd" ), QStringLiteral( "markdown" ) } )	;
 
-		d->html->setText( MD::toHtml( d->mdDoc, false ) );
+		d->html->setText( MD::toHtml( d->mdDoc, false,
+			QStringLiteral( "qrc:/res/img/go-jump.png" ) ) );
 	}
 }
 

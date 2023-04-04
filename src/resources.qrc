@@ -91,5 +91,6 @@
         <file>res/katex/katex.min.js</file>
         <file>res/katex/README.md</file>
         <file>res/img/bookmarks-organize.png</file>
+        <file>res/img/go-jump.png</file>
     </qresource>
 </RCC>
