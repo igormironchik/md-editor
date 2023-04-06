@@ -23,38 +23,49 @@
 #pragma once
 
 // Qt include.
-#include <QWebEngineView>
+#include <QFrame>
 #include <QScopedPointer>
 
 
 namespace MdEditor {
 
 //
-// WebView
+// FindWeb
 //
 
-struct WebViewPrivate;
+struct FindWebPrivate;
+class MainWindow;
+class WebView;
 
-//! HTML preview.
-class WebView
-	:	public QWebEngineView
+//! FindWeb/replace widget.
+class FindWeb
+	:	public QFrame
 {
 	Q_OBJECT
 
 public:
-	explicit WebView( QWidget * parent );
-	~WebView() override;
+	FindWeb( MainWindow * window, WebView * web, QWidget * parent );
+	~FindWeb() override;
+
+public slots:
+	void setFindWebText( const QString & text );
+	void setFocusOnFindWeb();
 
 private slots:
-	void onSelectionChanged();
-	void onCopy();
+	void onFindWebTextChanged( const QString & str );
+	void onClose();
+	void onFindPrev();
+	void onFindNext();
+
+protected:
+	void hideEvent( QHideEvent * event ) override;
 
 private:
-	friend class WebViewPrivate;
+	friend struct FindWebPrivate;
 
-	Q_DISABLE_COPY( WebView )
+	Q_DISABLE_COPY( FindWeb )
 
-	QScopedPointer< WebViewPrivate > d;
-}; // class WebView
+	QScopedPointer< FindWebPrivate > d;
+}; // class FindWeb
 
 } /* namespace MdEditor */

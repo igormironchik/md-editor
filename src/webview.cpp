@@ -25,6 +25,8 @@
 
 // Qt include.
 #include <QContextMenuEvent>
+#include <QApplication>
+#include <QClipboard>
 
 
 namespace MdEditor {
@@ -41,11 +43,20 @@ struct WebViewPrivate {
 
 	void initUi()
 	{
-		q->setContextMenuPolicy( Qt::NoContextMenu );
+		copyAction = new QAction( WebView::tr( "Copy" ), q );
+		q->addAction( copyAction );
+		copyAction->setEnabled( false );
+		q->setContextMenuPolicy( Qt::ActionsContextMenu );
 		q->setFocusPolicy( Qt::ClickFocus );
+
+		QObject::connect( copyAction, &QAction::triggered,
+			q, &WebView::onCopy );
+		QObject::connect( q, &QWebEngineView::selectionChanged,
+			q, &WebView::onSelectionChanged );
 	}
 
 	WebView * q;
+	QAction * copyAction = nullptr;
 }; // struct WebViewPrivate
 
 
@@ -62,6 +73,18 @@ WebView::WebView( QWidget * parent )
 
 WebView::~WebView()
 {
+}
+
+void
+WebView::onSelectionChanged()
+{
+	d->copyAction->setEnabled( hasSelection() );
+}
+
+void
+WebView::onCopy()
+{
+	QApplication::clipboard()->setText( selectedText() );
 }
 
 } /* namespace MdEditor */

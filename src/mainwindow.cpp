@@ -27,6 +27,7 @@
 #include "previewpage.hpp"
 #include "htmldocument.hpp"
 #include "find.hpp"
+#include "findweb.hpp"
 #include "gotoline.hpp"
 #include "fontdlg.hpp"
 #include "cfg.hpp"
@@ -84,7 +85,9 @@ struct MainWindowPrivate {
 	{
 		auto w = new QWidget( q );
 		auto l = new QHBoxLayout( w );
+
 		splitter = new QSplitter( Qt::Horizontal, w );
+
 		auto ew = new QWidget( w );
 		auto v = new QVBoxLayout( ew );
 		v->setContentsMargins( 0, 0, 0, 0 );
@@ -95,12 +98,22 @@ struct MainWindowPrivate {
 		v->addWidget( editor );
 		v->addWidget( gotoline );
 		v->addWidget( find );
+
+		auto pw = new QWidget( w );
+		auto v1 = new QVBoxLayout( pw );
+		v1->setContentsMargins( 0, 0, 0, 0 );
+		v1->setSpacing( 0 );
 		preview = new WebView( w );
+		findWeb = new FindWeb( q, preview, pw );
+		v1->addWidget( preview );
+		v1->addWidget( findWeb );
+
 		find->hide();
 		gotoline->hide();
+		findWeb->hide();
 
 		splitter->addWidget( ew );
-		splitter->addWidget( preview );
+		splitter->addWidget( pw );
 
 		l->addWidget( splitter );
 
@@ -170,6 +183,12 @@ struct MainWindowPrivate {
 		toggleFindAction->setShortcut( MainWindow::tr( "Ctrl+F" ) );
 		q->addAction( toggleFindAction );
 
+		toggleFindWebAction = new QAction(
+			QIcon( QStringLiteral( ":/res/img/edit-find.png" ) ),
+			MainWindow::tr( "Find In Preview" ), q );
+		toggleFindWebAction->setShortcut( MainWindow::tr( "Ctrl+W" ) );
+		q->addAction( toggleFindWebAction );
+
 		toggleGoToLineAction = new QAction(
 			QIcon( QStringLiteral( ":/res/img/go-next-use.png" ) ),
 			MainWindow::tr( "Go to Line" ), q );
@@ -237,6 +256,8 @@ struct MainWindowPrivate {
 			editor, &Editor::showUnprintableCharacters );
 		QObject::connect( toggleFindAction, &QAction::triggered,
 			q, &MainWindow::onFind );
+		QObject::connect( toggleFindWebAction, &QAction::triggered,
+			q, &MainWindow::onFindWeb );
 		QObject::connect( toggleGoToLineAction, &QAction::triggered,
 			q, &MainWindow::onGoToLine );
 		QObject::connect( page, &QWebEnginePage::linkHovered,
@@ -266,12 +287,14 @@ struct MainWindowPrivate {
 	QSplitter * splitter = nullptr;
 	HtmlDocument * html = nullptr;
 	Find * find = nullptr;
+	FindWeb * findWeb = nullptr;
 	GoToLine * gotoline = nullptr;
 	QAction * newAction = nullptr;
 	QAction * openAction = nullptr;
 	QAction * saveAction = nullptr;
 	QAction * saveAsAction = nullptr;
 	QAction * toggleFindAction = nullptr;
+	QAction * toggleFindWebAction = nullptr;
 	QAction * toggleGoToLineAction = nullptr;
 	QAction * editMenuAction = nullptr;
 	QAction * loadAllAction = nullptr;
@@ -525,7 +548,9 @@ MainWindow::event( QEvent * event )
 			{
 				event->accept();
 
-				if( d->gotoline->isVisible() )
+				if( d->findWeb->isVisible() )
+					d->findWeb->hide();
+				else if( d->gotoline->isVisible() )
 					d->gotoline->hide();
 				else if( d->find->isVisible() )
 					d->find->hide();
@@ -547,14 +572,14 @@ MainWindow::event( QEvent * event )
 void
 MainWindow::onToolHide()
 {
-	if( !d->find->isVisible() && ! d->gotoline->isVisible() )
+	if( !d->find->isVisible() && !d->gotoline->isVisible() )
 	{
 		d->editor->setFocus();
 		d->editor->clearHighlighting();
 	}
-	else if( d->find->isVisible() && ! d->gotoline->isVisible() )
+	else if( d->find->isVisible() && !d->gotoline->isVisible() )
 		d->find->setFocusOnFind();
-	else if( d->gotoline->isVisible() && ! d->find->isVisible() )
+	else if( d->gotoline->isVisible() && !d->find->isVisible() )
 		d->gotoline->setFocus();
 }
 
@@ -782,6 +807,15 @@ MainWindow::onFind( bool )
 }
 
 void
+MainWindow::onFindWeb( bool )
+{
+	if( !d->findWeb->isVisible() )
+		d->findWeb->show();
+
+	d->findWeb->setFocusOnFindWeb();
+}
+
+void
 MainWindow::onGoToLine( bool )
 {
 	if( !d->gotoline->isVisible() )
@@ -912,6 +946,7 @@ MainWindow::onCursorPositionChanged()
 
 	d->standardEditMenu->addAction( d->toggleFindAction );
 	d->standardEditMenu->addAction( d->toggleGoToLineAction );
+	d->standardEditMenu->addAction( d->toggleFindWebAction );
 
 	d->editMenuAction->setMenu( d->standardEditMenu );
 
@@ -922,8 +957,9 @@ MainWindow::onCursorPositionChanged()
 void
 MainWindow::onEditMenuActionTriggered( QAction * action )
 {
-	if( action != d->toggleFindAction && action != d->toggleGoToLineAction )
-		d->editor->setFocus();
+	if( action != d->toggleFindAction && action != d->toggleGoToLineAction &&
+		action != d->toggleFindWebAction )
+			d->editor->setFocus();
 }
 
 namespace {
@@ -1180,6 +1216,8 @@ MainWindow::onTogglePreviewAction( bool checked )
 		d->saveAction->setEnabled( false );
 		d->saveAsAction->setVisible( false );
 		d->saveAsAction->setEnabled( false );
+		d->toggleFindAction->setEnabled( false );
+		d->toggleGoToLineAction->setEnabled( false );
 		d->newAction->setVisible( false );
 		d->newAction->setEnabled( false );
 		d->editor->setVisible( false );
@@ -1198,6 +1236,8 @@ MainWindow::onTogglePreviewAction( bool checked )
 		d->saveAction->setEnabled( true );
 		d->saveAsAction->setVisible( true );
 		d->saveAsAction->setEnabled( true );
+		d->toggleFindAction->setEnabled( true );
+		d->toggleGoToLineAction->setEnabled( true );
 		d->newAction->setVisible( true );
 		d->newAction->setEnabled( true );
 		d->editor->setVisible( true );

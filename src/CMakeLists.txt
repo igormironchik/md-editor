@@ -21,6 +21,9 @@ set( SRC main.cpp
 	find.hpp
 	find.cpp
 	find.ui
+	findweb.hpp
+	findweb.cpp
+	findweb.ui
 	gotoline.hpp
 	gotoline.cpp
 	gotoline.ui

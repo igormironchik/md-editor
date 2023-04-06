@@ -69,6 +69,7 @@ private slots:
 	void onAboutQt();
 	void onLineHovered( int lineNumber, const QPoint & pos );
 	void onFind( bool on );
+	void onFindWeb( bool on );
 	void onGoToLine( bool on );
 	void onChooseFont();
 	void onLessFontSize();
@@ -96,6 +97,7 @@ private:
 
 	friend struct MainWindowPrivate;
 	friend class Find;
+	friend class FindWeb;
 	friend class GoToLine;
 
 	QScopedPointer< MainWindowPrivate > d;
