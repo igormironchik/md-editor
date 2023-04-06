@@ -124,8 +124,14 @@ struct MainWindowPrivate {
 
 		q->updateWindowTitle();
 
+#ifdef Q_OS_WIN
+		mdPdfExe = QStringLiteral( "md-pdf-gui.bat" );
+#else
+		mdPdfExe = QStringLiteral( "md-pdf-gui" );
+#endif
+
 		QDir workingDir( QApplication::applicationDirPath() );
-		const auto files = workingDir.entryInfoList( { QStringLiteral( "md-pdf-gui*" ) },
+		const auto files = workingDir.entryInfoList( { mdPdfExe },
 			QDir::Executable | QDir::Files );
 
 		auto fileMenu = q->menuBar()->addMenu( MainWindow::tr( "&File" ) );
@@ -281,6 +287,7 @@ struct MainWindowPrivate {
 	std::shared_ptr< MD::Document< MD::QStringTrait > > mdDoc;
 	QString baseUrl;
 	QString rootFilePath;
+	QString mdPdfExe;
 }; // struct MainWindowPrivate
 
 
@@ -306,7 +313,7 @@ void
 MainWindow::onConvertToPdf()
 {
 	QDir workingDir( QApplication::applicationDirPath() );
-	const auto files = workingDir.entryInfoList( { QStringLiteral( "md-pdf-gui*" ) },
+	const auto files = workingDir.entryInfoList( { d->mdPdfExe },
 		QDir::Executable | QDir::Files );
 
 	if( !files.isEmpty() )
