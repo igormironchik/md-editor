@@ -31,6 +31,7 @@
 #include "gotoline.hpp"
 #include "fontdlg.hpp"
 #include "cfg.hpp"
+#include "version.hpp"
 
 // Qt include.
 #include <QSplitter>
@@ -650,9 +651,10 @@ MainWindow::onAbout()
 {
 	QMessageBox::about( this, tr( "About Markdown Editor" ),
 		tr( "Markdown Editor.\n\n"
+			"Version %1\n\n"
 			"Author - Igor Mironchik (igor.mironchik at gmail dot com).\n\n"
 			"Copyright (c) 2023 Igor Mironchik.\n\n"
-			"Licensed under GNU GPL 3.0." ) );
+			"Licensed under GNU GPL 3.0." ).arg( c_version ) );
 }
 
 void
