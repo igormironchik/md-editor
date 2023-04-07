@@ -946,6 +946,7 @@ MainWindow::onCursorPositionChanged()
 
 	d->standardEditMenu->addAction( d->toggleFindAction );
 	d->standardEditMenu->addAction( d->toggleGoToLineAction );
+	d->standardEditMenu->addSeparator();
 	d->standardEditMenu->addAction( d->toggleFindWebAction );
 
 	d->editMenuAction->setMenu( d->standardEditMenu );

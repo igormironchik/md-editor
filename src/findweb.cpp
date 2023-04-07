@@ -100,7 +100,7 @@ FindWeb::onFindWebTextChanged( const QString & str )
 	d->ui.findNextBtn->defaultAction()->setEnabled( !str.isEmpty() );
 	d->ui.findPrevBtn->defaultAction()->setEnabled( !str.isEmpty() );
 
-	d->web->findText( str );
+	d->web->findText( str, QWebEnginePage::FindCaseSensitively );
 }
 
 void
@@ -116,7 +116,7 @@ FindWeb::setFocusOnFindWeb()
 {
 	d->ui.findEdit->setFocus();
 	d->ui.findEdit->selectAll();
-	d->web->findText( d->ui.findEdit->text() );
+	d->web->findText( d->ui.findEdit->text(), QWebEnginePage::FindCaseSensitively );
 }
 
 void
@@ -130,13 +130,14 @@ FindWeb::onClose()
 void
 FindWeb::onFindNext()
 {
-	d->web->findText( d->ui.findEdit->text() );
+	d->web->findText( d->ui.findEdit->text(), QWebEnginePage::FindCaseSensitively );
 }
 
 void
 FindWeb::onFindPrev()
 {
-	d->web->findText( d->ui.findEdit->text(), QWebEnginePage::FindBackward );
+	d->web->findText( d->ui.findEdit->text(), QWebEnginePage::FindBackward |
+		QWebEnginePage::FindCaseSensitively );
 }
 
 void
