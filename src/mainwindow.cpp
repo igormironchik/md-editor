@@ -56,6 +56,7 @@
 #include <QDockWidget>
 #include <QTreeWidget>
 #include <QProcess>
+#include <QLineEdit>
 
 // md4qt include.
 #define MD4QT_QT_SUPPORT
@@ -119,8 +120,6 @@ struct MainWindowPrivate {
 		l->addWidget( splitter );
 
 		q->setCentralWidget( w );
-		q->setFocusPolicy( Qt::ClickFocus );
-		w->setFocusPolicy( Qt::ClickFocus );
 
 		page = new PreviewPage( preview );
 		preview->setPage( page );
@@ -279,6 +278,12 @@ struct MainWindowPrivate {
 		q->onCursorPositionChanged();
 
 		editor->setFocus();
+
+		preview->setFocusPolicy( Qt::ClickFocus );
+
+		q->setTabOrder( gotoline->line(), find->editLine() );
+		q->setTabOrder( find->editLine(), find->replaceLine() );
+		q->setTabOrder( find->replaceLine(), findWeb->line() );
 	}
 
 	MainWindow * q = nullptr;
@@ -581,7 +586,7 @@ MainWindow::onToolHide()
 	else if( d->find->isVisible() && !d->gotoline->isVisible() )
 		d->find->setFocusOnFind();
 	else if( d->gotoline->isVisible() && !d->find->isVisible() )
-		d->gotoline->setFocus();
+		d->gotoline->setFocusOnLine();
 }
 
 QString
@@ -823,7 +828,7 @@ MainWindow::onGoToLine( bool )
 	if( !d->gotoline->isVisible() )
 		d->gotoline->show();
 
-	d->gotoline->setFocus();
+	d->gotoline->setFocusOnLine();
 }
 
 void

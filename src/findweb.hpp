@@ -27,6 +27,11 @@
 #include <QScopedPointer>
 
 
+QT_BEGIN_NAMESPACE
+class QLineEdit;
+QT_END_NAMESPACE
+
+
 namespace MdEditor {
 
 //
@@ -46,6 +51,8 @@ class FindWeb
 public:
 	FindWeb( MainWindow * window, WebView * web, QWidget * parent );
 	~FindWeb() override;
+
+	QLineEdit * line() const;
 
 public slots:
 	void setFindWebText( const QString & text );

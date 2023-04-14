@@ -61,6 +61,8 @@ struct CloseButtonPrivate {
 		}
 
 		inactivePixmap = QPixmap::fromImage( target );
+
+		q->setFocusPolicy( Qt::NoFocus );
 	}
 
 	CloseButton * q = nullptr;

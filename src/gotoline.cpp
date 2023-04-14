@@ -80,8 +80,14 @@ GoToLine::~GoToLine()
 {
 }
 
+QLineEdit *
+GoToLine::line() const
+{
+	return d->ui.line;
+}
+
 void
-GoToLine::setFocus()
+GoToLine::setFocusOnLine()
 {
 	d->ui.line->setFocus();
 	d->ui.line->selectAll();

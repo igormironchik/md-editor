@@ -110,6 +110,18 @@ Find::~Find()
 {
 }
 
+QLineEdit *
+Find::editLine() const
+{
+	return d->ui.findEdit;
+}
+
+QLineEdit *
+Find::replaceLine() const
+{
+	return d->ui.replaceEdit;
+}
+
 void
 Find::onFindTextChanged( const QString & str )
 {

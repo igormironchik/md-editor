@@ -26,6 +26,10 @@
 #include <QFrame>
 #include <QScopedPointer>
 
+QT_BEGIN_NAMESPACE
+class QLineEdit;
+QT_END_NAMESPACE
+
 
 namespace MdEditor {
 
@@ -47,8 +51,10 @@ public:
 	GoToLine( MainWindow * window, Editor * editor, QWidget * parent );
 	~GoToLine() override;
 
+	QLineEdit * line() const;
+
 public slots:
-	void setFocus();
+	void setFocusOnLine();
 
 private slots:
 	void onEditingFinished();

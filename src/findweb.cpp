@@ -92,6 +92,12 @@ FindWeb::~FindWeb()
 {
 }
 
+QLineEdit *
+FindWeb::line() const
+{
+	return d->ui.findEdit;
+}
+
 void
 FindWeb::onFindWebTextChanged( const QString & str )
 {

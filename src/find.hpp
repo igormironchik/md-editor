@@ -27,6 +27,11 @@
 #include <QScopedPointer>
 
 
+QT_BEGIN_NAMESPACE
+class QLineEdit;
+QT_END_NAMESPACE
+
+
 namespace MdEditor {
 
 //
@@ -46,6 +51,9 @@ class Find
 public:
 	Find( MainWindow * window, Editor * editor, QWidget * parent );
 	~Find() override;
+
+	QLineEdit * editLine() const;
+	QLineEdit * replaceLine() const;
 
 public slots:
 	void setFindText( const QString & text );
