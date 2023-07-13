@@ -433,12 +433,10 @@ Editor::onFindPrev()
 void
 Editor::clearExtraSelections()
 {
+	d->highlightedTex.clear();
 	d->extraSelections.clear();
 
-	QList< QTextEdit::ExtraSelection > s = d->extraSelections;
-	s.prepend( d->currentLine );
-
-	setExtraSelections( s );
+	setExtraSelections( { d->currentLine } );
 }
 
 void
@@ -484,9 +482,7 @@ Editor::replaceAll( const QString & with )
 
 		editCursor.endEditBlock();
 
-		d->extraSelections.clear();
-
-		setExtraSelections( { d->currentLine } );
+		clearExtraSelections();
 	}
 
 	connect( document(), &QTextDocument::contentsChanged, this, &Editor::onContentChanged );
@@ -507,9 +503,7 @@ Editor::highlightCurrent()
 void
 Editor::clearHighlighting()
 {
-	d->extraSelections.clear();
-
-	setExtraSelections( { d->currentLine } );
+	clearExtraSelections();
 }
 
 void

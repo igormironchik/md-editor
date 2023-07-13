@@ -586,7 +586,10 @@ MainWindow::onToolHide()
 	else if( d->find->isVisible() && !d->gotoline->isVisible() )
 		d->find->setFocusOnFind();
 	else if( d->gotoline->isVisible() && !d->find->isVisible() )
+	{
 		d->gotoline->setFocusOnLine();
+		d->editor->clearHighlighting();
+	}
 }
 
 QString
@@ -807,10 +810,7 @@ MainWindow::onFind( bool )
 	if( !d->editor->textCursor().selection().isEmpty() )
 		d->find->setFindText( d->editor->textCursor().selection().toPlainText() );
 	else
-	{
-		d->editor->highlightCurrent();
 		d->find->setFocusOnFind();
-	}
 }
 
 void

@@ -146,8 +146,6 @@ Find::setFindText( const QString & text )
 
 	setFocusOnFind();
 
-	d->editor->highlight( text );
-
 	onSelectionChanged();
 }
 
@@ -156,6 +154,8 @@ Find::setFocusOnFind()
 {
 	d->ui.findEdit->setFocus();
 	d->ui.findEdit->selectAll();
+
+	d->editor->highlight( d->ui.findEdit->text() );
 }
 
 void
