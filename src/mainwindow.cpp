@@ -57,6 +57,8 @@
 #include <QTreeWidget>
 #include <QProcess>
 #include <QLineEdit>
+#include <QLabel>
+#include <QTextBlock>
 
 // md4qt include.
 #define MD4QT_QT_SUPPORT
@@ -244,6 +246,9 @@ struct MainWindowPrivate {
 		helpMenu->addAction( QIcon( QStringLiteral( ":/res/img/bookmarks-organize.png" ) ),
 				MainWindow::tr( "Licenses" ), q, &MainWindow::onShowLicenses );
 
+		cursorPosLabel = new QLabel( q );
+		q->statusBar()->addPermanentWidget( cursorPosLabel );
+
 		QObject::connect( editor->document(), &QTextDocument::modificationChanged,
 			saveAction, &QAction::setEnabled );
 		QObject::connect( editor->document(), &QTextDocument::modificationChanged,
@@ -310,6 +315,7 @@ struct MainWindowPrivate {
 	QMenu * settingsMenu = nullptr;
 	QDockWidget * fileTreeDock = nullptr;
 	QTreeWidget * fileTree = nullptr;
+	QLabel * cursorPosLabel = nullptr;
 	bool init = false;
 	bool loadAllFlag = false;
 	bool previewMode = false;
@@ -960,6 +966,11 @@ MainWindow::onCursorPositionChanged()
 
 	connect( d->standardEditMenu, &QMenu::triggered,
 		this, &MainWindow::onEditMenuActionTriggered );
+
+	const auto c = d->editor->textCursor();
+
+	d->cursorPosLabel->setText( tr( "Line: %1, Col: %2" )
+		.arg( c.block().blockNumber() + 1 ).arg( c.columnNumber() + 1 ) );
 }
 
 void
