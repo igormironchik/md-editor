@@ -467,8 +467,11 @@ MainWindow::onFileOpen()
 			return;
 	}
 
-	QFileDialog dialog( this, tr( "Open Markdown File" ),
-		QStandardPaths::standardLocations( QStandardPaths::HomeLocation ).first() );
+	const auto folder = d->editor->docName() == QStringLiteral( "default.md" ) ?
+		QStandardPaths::standardLocations( QStandardPaths::HomeLocation ).first() :
+		QFileInfo( d->editor->docName() ).absolutePath();
+
+	QFileDialog dialog( this, tr( "Open Markdown File" ), folder );
 	dialog.setMimeTypeFilters( { "text/markdown" } );
 	dialog.setAcceptMode( QFileDialog::AcceptOpen );
 
