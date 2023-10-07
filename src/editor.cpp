@@ -28,6 +28,9 @@
 #include <QTextBlock>
 #include <QTextDocument>
 
+// C++ include.
+#include <functional>
+
 
 namespace MdEditor {
 
@@ -330,6 +333,28 @@ Editor::showLineNumbers( bool on )
 	updateLineNumberAreaWidth( 0 );
 }
 
+namespace /* anonymous */ {
+
+template< class Iterator, class C = std::less<> >
+bool markSelection( Iterator first, Iterator last, QTextCursor c, Editor * e, C cmp = C{} )
+{
+	for( ; first != last; ++first )
+	{
+		if( cmp( c.position(), first->cursor.position() ) )
+		{
+			c.setPosition( first->cursor.selectionStart() );
+			c.setPosition( first->cursor.selectionEnd(), QTextCursor::KeepAnchor );
+			e->setTextCursor( c );
+
+			return true;
+		}
+	}
+
+	return false;
+}
+
+} /* namespace anonymous */
+
 void
 Editor::highlight( const QString & text )
 {
@@ -361,31 +386,25 @@ Editor::highlight( const QString & text )
 	s.prepend( d->currentLine );
 
 	setExtraSelections( s );
+
+	if( !d->extraSelections.isEmpty() )
+	{
+		if( !markSelection( d->extraSelections.cbegin(), d->extraSelections.cend(),
+			QTextCursor( firstVisibleBlock() ), this ) )
+		{
+			markSelection( d->extraSelections.crbegin(), d->extraSelections.crend(),
+				QTextCursor( firstVisibleBlock() ), this, std::greater<> {} );
+		}
+	}
 }
 
 void
 Editor::onFindNext()
 {
 	if( !d->extraSelections.isEmpty() )
-	{
-		auto c = textCursor();
-		bool setToFirst = true;
-
-		for( const auto & s : qAsConst( d->extraSelections ) )
-		{
-			if( c.position() < s.cursor.position() )
-			{
-				c.setPosition( s.cursor.selectionStart() );
-				c.setPosition( s.cursor.selectionEnd(), QTextCursor::KeepAnchor );
-				setTextCursor( c );
-
-				setToFirst = false;
-
-				break;
-			}
-		}
-
-		if( setToFirst )
+	{		
+		if( !markSelection( d->extraSelections.cbegin(), d->extraSelections.cend(),
+			textCursor(), this ) )
 		{
 			auto s = d->extraSelections.at( 0 ).cursor;
 			auto c = textCursor();
@@ -402,24 +421,9 @@ Editor::onFindPrev()
 	if( !d->extraSelections.isEmpty() )
 	{
 		auto c = textCursor();
-		bool setToLast = true;
 
-		for( auto it = d->extraSelections.crbegin(), last = d->extraSelections.crend();
-			it != last; ++it )
-		{
-			if( c.position() > it->cursor.position() )
-			{
-				c.setPosition( it->cursor.selectionStart() );
-				c.setPosition( it->cursor.selectionEnd(), QTextCursor::KeepAnchor );
-				setTextCursor( c );
-
-				setToLast = false;
-
-				break;
-			}
-		}
-
-		if( setToLast )
+		if( !markSelection( d->extraSelections.crbegin(), d->extraSelections.crend(),
+			textCursor(), this, std::greater<> {} ) )
 		{
 			auto s = d->extraSelections.at( d->extraSelections.size() - 1 ).cursor;
 			auto c = textCursor();

@@ -26,6 +26,9 @@
 #include "editor.hpp"
 #include "mainwindow.hpp"
 
+// Qt include.
+#include <QPalette>
+
 
 namespace MdEditor {
 
@@ -74,6 +77,8 @@ struct FindPrivate {
 		ui.replaceAllBtn->setDefaultAction( replaceAllAction );
 		ui.replaceAllBtn->setEnabled( false );
 
+		textColor = ui.findEdit->palette().color( QPalette::Text );
+
 		QObject::connect( findPrevAction, &QAction::triggered,
 			editor, &Editor::onFindPrev );
 		QObject::connect( findNextAction, &QAction::triggered,
@@ -91,6 +96,7 @@ struct FindPrivate {
 	Find * q = nullptr;
 	Editor * editor = nullptr;
 	MainWindow * window = nullptr;
+	QColor textColor;
 	Ui::Find ui;
 }; // struct FindPrivate
 
@@ -131,6 +137,15 @@ Find::onFindTextChanged( const QString & str )
 	d->ui.findPrevBtn->defaultAction()->setEnabled( !str.isEmpty() );
 
 	d->editor->highlight( d->ui.findEdit->text() );
+
+	QColor c = d->textColor;
+
+	if( !d->editor->foundHighlighted() )
+		c = Qt::red;
+
+	QPalette palette = d->ui.findEdit->palette();
+	palette.setColor( QPalette::Text, c );
+	d->ui.findEdit->setPalette( palette );
 }
 
 void
