@@ -26,6 +26,10 @@
 #include "mainwindow.hpp"
 #include "webview.hpp"
 
+// Qt include.
+#include <QWebEngineFindTextResult>
+#include <QPalette>
+
 
 namespace MdEditor {
 
@@ -62,6 +66,8 @@ struct FindWebPrivate {
 		ui.findNextBtn->setDefaultAction( findNextAction );
 		ui.findNextBtn->setEnabled( false );
 
+		textColor = ui.findEdit->palette().color( QPalette::Text );
+
 		QObject::connect( findPrevAction, &QAction::triggered,
 			q, &FindWeb::onFindPrev );
 		QObject::connect( findNextAction, &QAction::triggered,
@@ -73,6 +79,7 @@ struct FindWebPrivate {
 	FindWeb * q = nullptr;
 	WebView * web = nullptr;
 	MainWindow * window = nullptr;
+	QColor textColor;
 	Ui::FindWeb ui;
 }; // struct FindWebPrivate
 
@@ -101,12 +108,24 @@ FindWeb::line() const
 void
 FindWeb::onFindWebTextChanged( const QString & str )
 {
-	d->ui.findNextBtn->setEnabled( !str.isEmpty() );
-	d->ui.findPrevBtn->setEnabled( !str.isEmpty() );
-	d->ui.findNextBtn->defaultAction()->setEnabled( !str.isEmpty() );
-	d->ui.findPrevBtn->defaultAction()->setEnabled( !str.isEmpty() );
+	auto result = [&]( const QWebEngineFindTextResult & r )
+	{
+		QColor c = d->textColor;
 
-	d->web->findText( str, QWebEnginePage::FindCaseSensitively );
+		if( !r.numberOfMatches() )
+			c = Qt::red;
+
+		d->ui.findNextBtn->setEnabled( r.numberOfMatches() );
+		d->ui.findPrevBtn->setEnabled( r.numberOfMatches() );
+		d->ui.findNextBtn->defaultAction()->setEnabled( r.numberOfMatches() );
+		d->ui.findPrevBtn->defaultAction()->setEnabled( r.numberOfMatches() );
+
+		QPalette palette = d->ui.findEdit->palette();
+		palette.setColor( QPalette::Text, c );
+		d->ui.findEdit->setPalette( palette );
+	};
+
+	d->web->findText( str, QWebEnginePage::FindCaseSensitively, result );
 }
 
 void

@@ -131,17 +131,17 @@ Find::replaceLine() const
 void
 Find::onFindTextChanged( const QString & str )
 {
-	d->ui.findNextBtn->setEnabled( !str.isEmpty() );
-	d->ui.findPrevBtn->setEnabled( !str.isEmpty() );
-	d->ui.findNextBtn->defaultAction()->setEnabled( !str.isEmpty() );
-	d->ui.findPrevBtn->defaultAction()->setEnabled( !str.isEmpty() );
-
 	d->editor->highlight( d->ui.findEdit->text() );
 
 	QColor c = d->textColor;
 
 	if( !d->editor->foundHighlighted() )
 		c = Qt::red;
+
+	d->ui.findNextBtn->setEnabled( d->editor->foundHighlighted() );
+	d->ui.findPrevBtn->setEnabled( d->editor->foundHighlighted() );
+	d->ui.findNextBtn->defaultAction()->setEnabled( d->editor->foundHighlighted() );
+	d->ui.findPrevBtn->defaultAction()->setEnabled( d->editor->foundHighlighted() );
 
 	QPalette palette = d->ui.findEdit->palette();
 	palette.setColor( QPalette::Text, c );
