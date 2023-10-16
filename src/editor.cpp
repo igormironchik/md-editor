@@ -30,6 +30,7 @@
 
 // C++ include.
 #include <functional>
+#include <utility>
 
 
 namespace MdEditor {
@@ -98,7 +99,7 @@ Editor::foundSelected() const
 {
 	const auto c = textCursor();
 
-	for( const auto & s : qAsConst( d->extraSelections ) )
+	for( const auto & s : std::as_const( d->extraSelections ) )
 	{
 		if( c.position() == s.cursor.position() )
 		{
