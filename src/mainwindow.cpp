@@ -1319,6 +1319,7 @@ paragraphToMD( MD::Paragraph< MD::QStringTrait > * p, QPlainTextEdit * editor )
 
 	auto res = c.selectedText();
 	res.replace( QChar( '\n' ), QChar( ' ' ) );
+	res.replace( QChar( 0x2029 ), QChar( ' ' ) );
 
 	return res;
 }
