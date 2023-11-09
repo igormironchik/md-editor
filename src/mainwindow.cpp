@@ -197,6 +197,8 @@ struct MainWindowPrivate {
 		toggleGoToLineAction->setShortcut( MainWindow::tr( "Ctrl+L" ) );
 		q->addAction( toggleGoToLineAction );
 
+		addTOCAction = new QAction( MainWindow::tr( "Add TOC" ), q );
+
 		auto viewMenu = q->menuBar()->addMenu( MainWindow::tr( "&View" ) );
 		viewAction = new QAction( QIcon( QStringLiteral( ":/res/img/view-preview.png" ) ),
 			MainWindow::tr( "Toggle Preview Mode" ) );
@@ -277,6 +279,8 @@ struct MainWindowPrivate {
 			q, &MainWindow::onCursorPositionChanged );
 		QObject::connect( viewAction, &QAction::toggled,
 			q, &MainWindow::onTogglePreviewAction );
+		QObject::connect( addTOCAction, &QAction::triggered,
+			q, &MainWindow::onAddTOC );
 
 		q->readCfg();
 
@@ -311,6 +315,7 @@ struct MainWindowPrivate {
 	QAction * loadAllAction = nullptr;
 	QAction * viewAction = nullptr;
 	QAction * convertToPdfAction = nullptr;
+	QAction * addTOCAction = nullptr;
 	QMenu * standardEditMenu = nullptr;
 	QMenu * settingsMenu = nullptr;
 	QDockWidget * fileTreeDock = nullptr;
@@ -964,6 +969,8 @@ MainWindow::onCursorPositionChanged()
 	d->standardEditMenu->addAction( d->toggleGoToLineAction );
 	d->standardEditMenu->addSeparator();
 	d->standardEditMenu->addAction( d->toggleFindWebAction );
+	d->standardEditMenu->addSeparator();
+	d->standardEditMenu->addAction( d->addTOCAction );
 
 	d->editMenuAction->setMenu( d->standardEditMenu );
 
@@ -1215,9 +1222,15 @@ void
 MainWindow::updateLoadAllLinkedFilesMenuText()
 {
 	if( d->loadAllFlag )
+	{
 		d->loadAllAction->setText( tr( "Show Only Current File..." ) );
+		d->addTOCAction->setEnabled( false );
+	}
 	else
+	{
 		d->loadAllAction->setText( tr( "Load All Linked Files..." ) );
+		d->addTOCAction->setEnabled( true );
+	}
 }
 
 void
@@ -1280,6 +1293,90 @@ MainWindow::onTogglePreviewAction( bool checked )
 	updateLoadAllLinkedFilesMenuText();
 
 	updateWindowTitle();
+}
+
+namespace /* anonymous */ {
+
+inline QString
+paragraphToMD( MD::Paragraph< MD::QStringTrait > * p, QPlainTextEdit * editor )
+{
+	QTextCursor c = editor->textCursor();
+
+	c.movePosition( QTextCursor::Start );
+
+	for( long long int i = 0; i < p->startLine(); ++i )
+		c.movePosition( QTextCursor::NextBlock );
+
+	for( long long int i = 0; i < p->startColumn(); ++i )
+		c.movePosition( QTextCursor::Right );
+
+	for( long long int i = p->startLine(); i < p->endLine(); ++i )
+		c.movePosition( QTextCursor::NextBlock, QTextCursor::KeepAnchor );
+
+	for( long long int i = ( p->startLine() == p->endLine() ? p->startColumn() : 0 );
+		i <= p->endColumn(); ++i )
+			c.movePosition( QTextCursor::Right, QTextCursor::KeepAnchor );
+
+	auto res = c.selectedText();
+	res.replace( QChar( '\n' ), QChar( ' ' ) );
+
+	return res;
+}
+
+inline QString
+simplifyLabel( const QString & label, const QString & fileName )
+{
+	return label.sliced( 0, label.lastIndexOf( fileName ) - 1 );
+}
+
+} /* namespace anonymous */
+
+void
+MainWindow::onAddTOC()
+{
+	QString toc;
+	int lvl = 0;
+	int offset = 0;
+	QString fileName;
+
+	for( auto it = d->mdDoc->items().cbegin(), last = d->mdDoc->items().cend();
+		it != last; ++it )
+	{
+		if( (*it)->type() == MD::ItemType::Anchor )
+		{
+			auto a = static_cast< MD::Anchor< MD::QStringTrait > * > ( it->get() );
+			fileName = a->label();
+		}
+		else if( (*it)->type() == MD::ItemType::Heading )
+		{
+			auto h = static_cast< MD::Heading< MD::QStringTrait > * > ( it->get() );
+
+			if( lvl )
+			{
+				if( lvl < h->level() )
+					offset += 2;
+				else if( lvl > h->level() )
+				{
+					while( lvl > h->level() && offset >= 2 )
+					{
+						--lvl;
+						offset -= 2;
+					}
+				}
+			}
+
+			lvl = h->level();
+
+			toc.append( QString( offset, QChar( ' ' ) ) );
+			toc.append( QStringLiteral( "* [" ) );
+			toc.append( paragraphToMD( h->text().get(), d->editor ) );
+			toc.append( QStringLiteral( "](" ) );
+			toc.append( simplifyLabel( h->label(), fileName ) );
+			toc.append( QStringLiteral( ")\n" ) );
+		}
+	}
+
+	d->editor->insertPlainText( toc );
 }
 
 void

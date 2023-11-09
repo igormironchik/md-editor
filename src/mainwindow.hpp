@@ -81,6 +81,7 @@ private slots:
 	void onTogglePreviewAction( bool checked );
 	void onShowLicenses();
 	void onConvertToPdf();
+	void onAddTOC();
 
 private:
     bool isModified() const;
