@@ -39,3 +39,11 @@ Build process is quite easy, just use `QtCreator` to open `CMakeLists.txt` and b
 ![md-editor](md-editor-view-mode.png)
 
 ![md-editor](md-editor-latext-math.png)
+
+# Known issues
+
+* Generated TOC may not work on `GitHub` if heading has text separated with two or more spaces.
+I will generate label like text is separated with one space, i.e. label will look like: `text-text`,
+where `-` replaces space, whereas `GitHub` will do `text--text`, i.e. two `-` for two spaces.
+To keep heading's auto labels work just don't use redundant spaces in headings, and TOC will
+work both in this editor and on `GitHub`.
