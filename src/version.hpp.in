@@ -7,5 +7,6 @@
 namespace MdEditor {
 
 static const QString c_version = QStringLiteral( "@MDEDITOR_VERSION@" );
+static const QString c_md4qtVersion = QStringLiteral( "@MD4QT_VERSION@" );
 
 } /* namespace MdEditor */
