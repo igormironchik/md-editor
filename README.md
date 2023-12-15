@@ -48,6 +48,6 @@ where `-` replaces space, whereas `GitHub` will do `text--text`, i.e. two `-` fo
 To keep heading's auto labels work just don't use redundant spaces in headings, and TOC will
 work both in this editor and on `GitHub`.
 
-* Don't use `HTML` attribute 'class' in `HTML` tags, it can lead to wrongly rendered content.
+* Don't use `HTML` attribute `class` in `HTML` tags, it can lead to wrongly rendered content.
 `GitHub` do a magick in this case, it just deletes `class` attribute, but this editor places
 `HTML` tags as they present.
