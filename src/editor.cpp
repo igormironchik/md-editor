@@ -357,7 +357,7 @@ bool markSelection( Iterator first, Iterator last, QTextCursor c, Editor * e, C 
 } /* namespace anonymous */
 
 void
-Editor::highlight( const QString & text )
+Editor::highlight( const QString & text, bool initCursor )
 {
 	d->highlightedTex = text;
 
@@ -388,7 +388,7 @@ Editor::highlight( const QString & text )
 
 	setExtraSelections( s );
 
-	if( !d->extraSelections.isEmpty() )
+	if( !d->extraSelections.isEmpty() && initCursor )
 	{
 		if( !markSelection( d->extraSelections.cbegin(), d->extraSelections.cend(),
 			QTextCursor( firstVisibleBlock() ), this ) )
@@ -502,7 +502,7 @@ Editor::onContentChanged()
 void
 Editor::highlightCurrent()
 {
-	highlight( d->highlightedTex );
+	highlight( d->highlightedTex, false );
 }
 
 void

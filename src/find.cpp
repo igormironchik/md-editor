@@ -131,7 +131,7 @@ Find::replaceLine() const
 void
 Find::onFindTextChanged( const QString & str )
 {
-	d->editor->highlight( d->ui.findEdit->text() );
+	d->editor->highlight( d->ui.findEdit->text(), true );
 
 	QColor c = d->textColor;
 
@@ -170,7 +170,7 @@ Find::setFocusOnFind()
 	d->ui.findEdit->setFocus();
 	d->ui.findEdit->selectAll();
 
-	d->editor->highlight( d->ui.findEdit->text() );
+	d->editor->highlight( d->ui.findEdit->text(), true );
 }
 
 void
