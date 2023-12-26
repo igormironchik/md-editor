@@ -616,6 +616,7 @@ MainWindow::htmlContent() const
 		"  <link rel=\"stylesheet\" href=\"qrc:/res/css/default.min.css\">\n"
 		"  <link rel=\"stylesheet\" href=\"qrc:/res/css/github-markdown.css\">\n"
 		"  <script src=\"qrc:/res/highlight.min.js\"></script>\n"
+		"  <script>hljs.configure({languages:[]});</script>"
 		"  <link rel=\"stylesheet\" href=\"qrc:/res/katex/katex.min.css\">\n"
 		"  <script src=\"qrc:/res/katex/katex.min.js\"></script>\n"
 		"  <script src=\"qrc:/res/katex/contrib/auto-render.min.js\"></script>\n"
