@@ -133,7 +133,9 @@ struct MainWindowPrivate {
 		page->setWebChannel( channel );
 
 		baseUrl = QString( "file:%1/" ).arg(
-			QStandardPaths::standardLocations( QStandardPaths::HomeLocation ).first() );
+			QString( QUrl::toPercentEncoding(
+				QStandardPaths::standardLocations( QStandardPaths::HomeLocation ).first(),
+					"/\\", {} ) ) );
 		editor->setDocName( QStringLiteral( "default.md" ) );
 		page->setHtml( q->htmlContent(), baseUrl );
 
@@ -394,7 +396,9 @@ MainWindow::openFile( const QString & path )
 	}
 
 	d->editor->setDocName( path );
-	d->baseUrl = QString( "file:%1/" ).arg( QFileInfo( path ).absoluteDir().absolutePath() );
+	d->baseUrl = QString( "file:%1/" ).arg(
+		QString( QUrl::toPercentEncoding(
+			QFileInfo( path ).absoluteDir().absolutePath(), "/\\", {} ) ) );
 	d->page->setHtml( htmlContent(), d->baseUrl );
 
 	d->editor->setPlainText( f.readAll() );
@@ -445,8 +449,11 @@ MainWindow::onFileNew()
 	d->editor->document()->setModified( false );
 	d->editor->document()->clearUndoRedoStacks();
 	updateWindowTitle();
+
 	d->baseUrl = QString( "file:%1/" ).arg(
-		QStandardPaths::standardLocations( QStandardPaths::HomeLocation ).first() );
+		QString( QUrl::toPercentEncoding(
+			QStandardPaths::standardLocations( QStandardPaths::HomeLocation ).first(),
+				"/\\", {} ) ) );
 	d->page->setHtml( htmlContent(), d->baseUrl );
 	onCursorPositionChanged();
 	d->loadAllAction->setEnabled( false );
@@ -527,8 +534,9 @@ MainWindow::onFileSaveAs()
 		return;
 
 	d->editor->setDocName( dialog.selectedFiles().constFirst() );
-	d->baseUrl = QString( "file:%1/" ).arg( QFileInfo( d->editor->docName() )
-		.absoluteDir().absolutePath() );
+	d->baseUrl = QString( "file:%1/" ).arg(
+		QString( QUrl::toPercentEncoding(
+			QFileInfo( d->editor->docName() ).absoluteDir().absolutePath(), "/\\", {} ) ) );
 	d->rootFilePath = d->editor->docName();
 
 	if( d->convertToPdfAction )
