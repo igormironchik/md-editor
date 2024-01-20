@@ -26,6 +26,14 @@
 #include <QPlainTextEdit>
 #include <QScopedPointer>
 
+// md-editor include.
+#include "colors.hpp"
+
+// md4qt include.
+#define MD4QT_QT_SUPPORT
+#include <md4qt/traits.hpp>
+#include <md4qt/parser.hpp>
+
 
 namespace MdEditor {
 
@@ -56,6 +64,9 @@ public:
 	int lineNumberAreaWidth();
 	bool foundHighlighted() const;
 	bool foundSelected() const;
+	void applyColors( const Colors & colors );
+	std::shared_ptr< MD::Document< MD::QStringTrait > > currentDoc() const;
+	void applyFont( const QFont & f );
 
 public slots:
 	void showUnprintableCharacters( bool on );
@@ -75,6 +86,8 @@ private slots:
 	void onFindNext();
 	void onFindPrev();
 	void onContentChanged();
+	void highlightSyntax( const Colors & colors,
+		std::shared_ptr< MD::Document< MD::QStringTrait > > doc );
 
 protected:
 	void resizeEvent( QResizeEvent * event ) override;

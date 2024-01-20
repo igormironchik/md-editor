@@ -82,6 +82,7 @@ private slots:
 	void onShowLicenses();
 	void onConvertToPdf();
 	void onAddTOC();
+	void onChangeColors();
 
 private:
     bool isModified() const;

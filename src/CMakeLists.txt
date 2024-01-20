@@ -30,6 +30,12 @@ set( SRC main.cpp
 	fontdlg.hpp
 	fontdlg.cpp
 	fontdlg.ui
+	colors.hpp
+	colors.cpp
+	colors.ui
+	color_widget.hpp
+	color_widget.cpp
+	cfg.cfgconf
 	${CMAKE_CURRENT_BINARY_DIR}/cfg.hpp
 	closebutton.hpp
 	closebutton.cpp )
@@ -51,7 +57,7 @@ execute_process( COMMAND git rev-parse --short HEAD
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 	OUTPUT_STRIP_TRAILING_WHITESPACE )
 
-set( MDEDITOR_VERSION "0.1.55 build ${MDEDITOR_VERSION_MINOR}" )
+set( MDEDITOR_VERSION "0.1.56 build ${MDEDITOR_VERSION_MINOR}" )
 
 configure_file( version.hpp.in ${CMAKE_CURRENT_BINARY_DIR}/version.hpp )
 

@@ -51,7 +51,7 @@ struct EditorPrivate {
 
 		QObject::connect( q, &Editor::cursorPositionChanged,
 			q, &Editor::highlightCurrentLine );
-		QObject::connect( q->document(), &QTextDocument::contentsChanged,
+		QObject::connect( q, &QPlainTextEdit::textChanged,
 			q, &Editor::onContentChanged );
 
 		q->showLineNumbers( true );
@@ -70,6 +70,8 @@ struct EditorPrivate {
 	QList< QTextEdit::ExtraSelection > extraSelections;
 	QTextEdit::ExtraSelection currentLine;
 	QString highlightedTex;
+	Colors colors;
+	std::shared_ptr< MD::Document< MD::QStringTrait > > currentDoc;
 }; // struct EditorPrivate
 
 
@@ -113,6 +115,28 @@ Editor::foundSelected() const
 	}
 
 	return false;
+}
+
+void
+Editor::applyColors( const Colors & colors )
+{
+	d->colors = colors;
+
+	onContentChanged();
+}
+
+std::shared_ptr< MD::Document< MD::QStringTrait > >
+Editor::currentDoc() const
+{
+	return d->currentDoc;
+}
+
+void
+Editor::applyFont( const QFont & f )
+{
+	setFont( f );
+
+	highlightSyntax( d->colors, d->currentDoc );
 }
 
 void
@@ -496,6 +520,15 @@ Editor::replaceAll( const QString & with )
 void
 Editor::onContentChanged()
 {
+	auto md = toPlainText();
+	QTextStream stream( &md );
+
+	MD::Parser< MD::QStringTrait > parser;
+
+	d->currentDoc = parser.parse( stream, d->docName );
+
+	highlightSyntax( d->colors, d->currentDoc );
+
 	highlightCurrent();
 }
 
@@ -533,6 +566,12 @@ Editor::goToLine( int l )
 	ensureCursorVisible();
 
 	setFocus();
+}
+
+void
+Editor::highlightSyntax( const Colors & colors,
+	std::shared_ptr< MD::Document< MD::QStringTrait > > doc )
+{
 }
 
 } /* namespace MdEditor */

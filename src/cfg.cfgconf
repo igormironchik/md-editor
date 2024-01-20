@@ -12,6 +12,36 @@
 				{name fontSize}
 				{defaultValue -1}
 			}
+
+			{tagScalar
+				{valueType bool}
+				{name useColors}
+				{defaultValue true}
+			}
+
+			{tagScalar
+				{valueType QString}
+				{name linkColor}
+				{defaultValue ""}
+			}
+
+			{tagScalar
+				{valueType QString}
+				{name listColor}
+				{defaultValue ""}
+			}
+
+			{tagScalar
+				{valueType QString}
+				{name textColor}
+				{defaultValue ""}
+			}
+
+			{tagScalar
+				{valueType QString}
+				{name inlineColor}
+				{defaultValue ""}
+			}
 		}
 	}
 }

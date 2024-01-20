@@ -32,6 +32,7 @@
 #include "fontdlg.hpp"
 #include "cfg.hpp"
 #include "version.hpp"
+#include "colors.hpp"
 
 // Qt include.
 #include <QSplitter>
@@ -241,6 +242,10 @@ struct MainWindowPrivate {
 			MainWindow::tr( "Font..." ),
 			q, &MainWindow::onChooseFont );
 
+		settingsMenu->addAction( QIcon( QStringLiteral( ":/res/img/fill-color.png" ) ),
+			MainWindow::tr( "Colors..." ),
+			q, &MainWindow::onChangeColors );
+
 
 		auto helpMenu = q->menuBar()->addMenu( MainWindow::tr( "&Help" ) );
 		helpMenu->addAction( QIcon( QStringLiteral( ":/res/img/icon_24x24.png" ) ),
@@ -292,6 +297,8 @@ struct MainWindowPrivate {
 
 		preview->setFocusPolicy( Qt::ClickFocus );
 
+		editor->applyColors( mdColors );
+
 		q->setTabOrder( gotoline->line(), find->editLine() );
 		q->setTabOrder( find->editLine(), find->replaceLine() );
 		q->setTabOrder( find->replaceLine(), findWeb->line() );
@@ -330,6 +337,7 @@ struct MainWindowPrivate {
 	QString baseUrl;
 	QString rootFilePath;
 	QString mdPdfExe;
+	Colors mdColors;
 }; // struct MainWindowPrivate
 
 
@@ -665,12 +673,7 @@ MainWindow::onTextChanged()
 {
 	if( !d->loadAllFlag )
 	{
-		auto md = d->editor->toPlainText();
-		QTextStream stream( &md );
-
-		MD::Parser< MD::QStringTrait > parser;
-
-		d->mdDoc = parser.parse( stream, d->editor->docName() );
+		d->mdDoc = d->editor->currentDoc();
 
 		d->html->setText( MD::toHtml( d->mdDoc, false,
 			QStringLiteral( "qrc:/res/img/go-jump.png" ) ) );
@@ -864,7 +867,7 @@ MainWindow::onChooseFont()
 
 	if( dlg.exec() == QDialog::Accepted )
 	{
-		d->editor->setFont( dlg.font() );
+		d->editor->applyFont( dlg.font() );
 
 		saveCfg();
 	}
@@ -885,6 +888,11 @@ MainWindow::saveCfg() const
 			Cfg cfg;
 			cfg.set_font( f.family() );
 			cfg.set_fontSize( f.pointSize() );
+			cfg.set_useColors( d->mdColors.enabled );
+			cfg.set_linkColor( d->mdColors.linkColor.name( QColor::HexRgb ) );
+			cfg.set_listColor( d->mdColors.listColor.name( QColor::HexRgb ) );
+			cfg.set_textColor( d->mdColors.textColor.name( QColor::HexRgb ) );
+			cfg.set_inlineColor( d->mdColors.inlineColor.name( QColor::HexRgb ) );
 
 			tag_Cfg< cfgfile::qstring_trait_t > tag( cfg );
 
@@ -923,8 +931,22 @@ MainWindow::readCfg()
 			{
 				const QFont f( cfg.font(), cfg.fontSize() );
 
-				d->editor->setFont( f );
+				d->editor->applyFont( f );
 			}
+
+			if( !cfg.linkColor().isEmpty() )
+				d->mdColors.linkColor = QColor( cfg.linkColor() );
+
+			if( !cfg.listColor().isEmpty() )
+				d->mdColors.listColor = QColor( cfg.listColor() );
+
+			if( !cfg.textColor().isEmpty() )
+				d->mdColors.textColor = QColor( cfg.textColor() );
+
+			if( !cfg.inlineColor().isEmpty() )
+				d->mdColors.inlineColor = QColor( cfg.inlineColor() );
+
+			d->mdColors.enabled = cfg.useColors();
 		}
 		catch( const cfgfile::exception_t< cfgfile::qstring_trait_t > & )
 		{
@@ -942,7 +964,7 @@ MainWindow::onLessFontSize()
 	{
 		f.setPointSize( f.pointSize() - 1 );
 
-		d->editor->setFont( f );
+		d->editor->applyFont( f );
 
 		saveCfg();
 	}
@@ -957,7 +979,7 @@ MainWindow::onMoreFontSize()
 	{
 		f.setPointSize( f.pointSize() + 1 );
 
-		d->editor->setFont( f );
+		d->editor->applyFont( f );
 
 		saveCfg();
 	}
@@ -1176,7 +1198,7 @@ MainWindow::readAllLinked()
 		MD::Parser< MD::QStringTrait > parser;
 
 		d->mdDoc = parser.parse( d->rootFilePath, true,
-			{ QStringLiteral( "md" ), QStringLiteral( "mkd" ), QStringLiteral( "markdown" ) } )	;
+			{ QStringLiteral( "md" ), QStringLiteral( "mkd" ), QStringLiteral( "markdown" ) } );
 
 		d->html->setText( MD::toHtml( d->mdDoc, false,
 			QStringLiteral( "qrc:/res/img/go-jump.png" ) ) );
@@ -1695,6 +1717,24 @@ MainWindow::onShowLicenses()
 			"OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>" ) );
 
 	msg.exec();
+}
+
+void
+MainWindow::onChangeColors()
+{
+	ColorsDialog dlg( d->mdColors, this );
+
+	if( dlg.exec() == QDialog::Accepted )
+	{
+		if( d->mdColors != dlg.colors() )
+		{
+			d->mdColors = dlg.colors();
+
+			d->editor->applyColors( d->mdColors );
+
+			saveCfg();
+		}
+	}
 }
 
 } /* namespace MdEditor */
