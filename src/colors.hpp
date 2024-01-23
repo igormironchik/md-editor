@@ -37,9 +37,9 @@ namespace MdEditor {
 
 //! Color scheme.
 struct Colors {
-	QColor textColor = Qt::blue;
-	QColor linkColor = Qt::green;
-	QColor listColor = Qt::green;
+	QColor textColor = QColor( 0, 0, 128 );
+	QColor linkColor = QColor( 0, 128, 0 );
+	QColor listColor = QColor( 0, 128, 0 );
 	QColor inlineColor = Qt::black;
 	bool enabled = true;
 }; // struct Colors

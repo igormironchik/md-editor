@@ -22,6 +22,7 @@
 
 // md-editor include.
 #include "editor.hpp"
+#include "syntaxvisitor.hpp"
 
 // Qt include.
 #include <QPainter>
@@ -42,6 +43,7 @@ namespace MdEditor {
 struct EditorPrivate {
 	EditorPrivate( Editor * parent )
 		:	q( parent )
+		,	syntax( parent )
 	{
 	}
 
@@ -55,7 +57,7 @@ struct EditorPrivate {
 			q, &Editor::onContentChanged );
 
 		q->showLineNumbers( true );
-		q->setFont( QFontDatabase::systemFont( QFontDatabase::FixedFont ) );
+		q->applyFont( QFontDatabase::systemFont( QFontDatabase::FixedFont ) );
 		q->updateLineNumberAreaWidth( 0 );
 		q->highlightCurrentLine();
 		q->showUnprintableCharacters( true );
@@ -63,15 +65,26 @@ struct EditorPrivate {
 		q->setCenterOnScroll( true );
 	}
 
+	void setExtraSelections()
+	{
+		QList< QTextEdit::ExtraSelection > tmp = syntaxHighlighting;
+		tmp << extraSelections;
+		tmp.prepend( currentLine );
+
+		q->setExtraSelections( tmp );
+	}
+
 	Editor * q = nullptr;
 	LineNumberArea * lineNumberArea = nullptr;
 	QString docName;
 	bool showLineNumberArea = true;
 	QList< QTextEdit::ExtraSelection > extraSelections;
+	QList< QTextEdit::ExtraSelection > syntaxHighlighting;
 	QTextEdit::ExtraSelection currentLine;
-	QString highlightedTex;
+	QString highlightedText;
 	Colors colors;
 	std::shared_ptr< MD::Document< MD::QStringTrait > > currentDoc;
+	SyntaxVisitor syntax;
 }; // struct EditorPrivate
 
 
@@ -123,6 +136,8 @@ Editor::applyColors( const Colors & colors )
 	d->colors = colors;
 
 	onContentChanged();
+
+	viewport()->update();
 }
 
 std::shared_ptr< MD::Document< MD::QStringTrait > >
@@ -135,6 +150,8 @@ void
 Editor::applyFont( const QFont & f )
 {
 	setFont( f );
+
+	d->syntax.setFont( f );
 
 	highlightSyntax( d->colors, d->currentDoc );
 }
@@ -212,10 +229,7 @@ Editor::highlightCurrentLine()
 	d->currentLine.cursor = textCursor();
 	d->currentLine.cursor.clearSelection();
 
-	QList< QTextEdit::ExtraSelection > tmp = d->extraSelections;
-	tmp.prepend( d->currentLine );
-
-	setExtraSelections( tmp );
+	d->setExtraSelections();
 }
 
 void
@@ -383,7 +397,7 @@ bool markSelection( Iterator first, Iterator last, QTextCursor c, Editor * e, C 
 void
 Editor::highlight( const QString & text, bool initCursor )
 {
-	d->highlightedTex = text;
+	d->highlightedText = text;
 
 	d->extraSelections.clear();
 
@@ -407,10 +421,7 @@ Editor::highlight( const QString & text, bool initCursor )
 		}
 	}
 
-	QList< QTextEdit::ExtraSelection > s = d->extraSelections;
-	s.prepend( d->currentLine );
-
-	setExtraSelections( s );
+	d->setExtraSelections();
 
 	if( !d->extraSelections.isEmpty() && initCursor )
 	{
@@ -462,10 +473,10 @@ Editor::onFindPrev()
 void
 Editor::clearExtraSelections()
 {
-	d->highlightedTex.clear();
+	d->highlightedText.clear();
 	d->extraSelections.clear();
 
-	setExtraSelections( { d->currentLine } );
+	d->setExtraSelections();
 }
 
 void
@@ -496,7 +507,7 @@ Editor::replaceAll( const QString & with )
 
 		while( !found.isNull() )
 		{
-			found = document()->find( d->highlightedTex, editCursor,
+			found = document()->find( d->highlightedText, editCursor,
 				QTextDocument::FindCaseSensitively );
 
 			if( !found.isNull() )
@@ -535,7 +546,7 @@ Editor::onContentChanged()
 void
 Editor::highlightCurrent()
 {
-	highlight( d->highlightedTex, false );
+	highlight( d->highlightedText, false );
 }
 
 void
@@ -572,6 +583,9 @@ void
 Editor::highlightSyntax( const Colors & colors,
 	std::shared_ptr< MD::Document< MD::QStringTrait > > doc )
 {
+	d->syntax.highlight( doc, colors );
+
+	d->setExtraSelections();
 }
 
 } /* namespace MdEditor */

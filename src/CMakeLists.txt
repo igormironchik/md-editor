@@ -35,6 +35,8 @@ set( SRC main.cpp
 	colors.ui
 	color_widget.hpp
 	color_widget.cpp
+	syntaxvisitor.cpp
+	syntaxvisitor.hpp
 	cfg.cfgconf
 	${CMAKE_CURRENT_BINARY_DIR}/cfg.hpp
 	closebutton.hpp
