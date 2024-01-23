@@ -135,7 +135,10 @@ Editor::applyColors( const Colors & colors )
 {
 	d->colors = colors;
 
-	onContentChanged();
+	if( d->colors.enabled )
+		onContentChanged();
+	else
+		d->syntax.clearHighlighting();
 
 	viewport()->update();
 }
@@ -497,7 +500,7 @@ Editor::replaceAll( const QString & with )
 {
 	if( foundHighlighted() )
 	{
-		disconnect( document(), &QTextDocument::contentsChanged, this, &Editor::onContentChanged );
+		disconnect( this, &QPlainTextEdit::textChanged, this, &Editor::onContentChanged );
 
 		QTextCursor editCursor( document() );
 
@@ -525,7 +528,7 @@ Editor::replaceAll( const QString & with )
 		clearExtraSelections();
 	}
 
-	connect( document(), &QTextDocument::contentsChanged, this, &Editor::onContentChanged );
+	connect( this, &QPlainTextEdit::textChanged, this, &Editor::onContentChanged );
 }
 
 void
@@ -538,7 +541,8 @@ Editor::onContentChanged()
 
 	d->currentDoc = parser.parse( stream, d->docName );
 
-	highlightSyntax( d->colors, d->currentDoc );
+	if( d->colors.enabled )
+		highlightSyntax( d->colors, d->currentDoc );
 
 	highlightCurrent();
 }
@@ -584,8 +588,6 @@ Editor::highlightSyntax( const Colors & colors,
 	std::shared_ptr< MD::Document< MD::QStringTrait > > doc )
 {
 	d->syntax.highlight( doc, colors );
-
-	d->setExtraSelections();
 }
 
 } /* namespace MdEditor */

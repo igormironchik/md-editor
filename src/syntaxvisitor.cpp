@@ -78,6 +78,22 @@ struct SyntaxVisitorPrivate {
 		}
 	}
 
+	QFont styleFont( int opts )
+	{
+		auto f = font;
+
+		if( opts & MD::ItalicText )
+			f.setItalic( true );
+
+		if( opts & MD::BoldText )
+			f.setBold( true );
+
+		if( opts & MD::StrikethroughText )
+			f.setStrikeOut( true );
+
+		return f;
+	}
+
 	//! Editor.
 	Editor * editor = nullptr;
 	//! Document.
@@ -117,6 +133,12 @@ SyntaxVisitor::setFont( const QFont & f )
 }
 
 void
+SyntaxVisitor::clearHighlighting()
+{
+	d->clearFormats();
+}
+
+void
 SyntaxVisitor::highlight( std::shared_ptr< MD::Document< MD::QStringTrait > > doc,
 	const Colors & colors )
 {
@@ -149,7 +171,7 @@ SyntaxVisitor::onText( MD::Text< MD::QStringTrait > * t )
 {
 	QTextCharFormat format;
 	format.setForeground( d->colors.textColor );
-	format.setFont( d->font );
+	format.setFont( d->styleFont( t->opts() ) );
 
 	d->setFormat( format, t->startLine(), t->startColumn(),
 		t->endLine(), t->endColumn() );
@@ -158,6 +180,11 @@ SyntaxVisitor::onText( MD::Text< MD::QStringTrait > * t )
 void
 SyntaxVisitor::onMath( MD::Math< MD::QStringTrait > * m )
 {
+	QTextCharFormat format;
+	format.setForeground( d->colors.mathColor );
+
+	d->setFormat( format, m->startLine(), m->startColumn(),
+		m->endLine(), m->endColumn() );
 }
 
 void
@@ -166,30 +193,44 @@ SyntaxVisitor::onLineBreak( MD::LineBreak< MD::QStringTrait > * b )
 }
 
 void
-SyntaxVisitor::onParagraph( MD::Paragraph< MD::QStringTrait > * p, bool wrap )
-{
-	MD::Visitor< MD::QStringTrait >::onParagraph( p, wrap );
-}
-
-void
 SyntaxVisitor::onHeading( MD::Heading< MD::QStringTrait > * h )
 {
+	QTextCharFormat format;
+	format.setForeground( d->colors.headingColor );
+	format.setFont( d->styleFont( MD::BoldText ) );
+
+	d->setFormat( format, h->startLine(), h->startColumn(),
+		h->endLine(), h->endColumn() );
 }
 
 void
 SyntaxVisitor::onCode( MD::Code< MD::QStringTrait > * c )
 {
+	QTextCharFormat format;
+	format.setForeground( d->colors.codeColor );
+
+	d->setFormat( format, c->startLine(), c->startColumn(),
+		c->endLine(), c->endColumn() );
 }
 
 void
 SyntaxVisitor::onInlineCode( MD::Code< MD::QStringTrait > * c )
 {
+	QTextCharFormat format;
+	format.setForeground( d->colors.inlineColor );
+
+	d->setFormat( format, c->startLine(), c->startColumn(),
+		c->endLine(), c->endColumn() );
 }
 
 void
 SyntaxVisitor::onBlockquote( MD::Blockquote< MD::QStringTrait > * b )
 {
-	MD::Visitor< MD::QStringTrait >::onBlockquote( b );
+	QTextCharFormat format;
+	format.setForeground( d->colors.blockquoteColor );
+
+	d->setFormat( format, b->startLine(), b->startColumn(),
+		b->endLine(), b->endColumn() );
 }
 
 void
@@ -209,8 +250,27 @@ SyntaxVisitor::onList( MD::List< MD::QStringTrait > * l )
 }
 
 void
+SyntaxVisitor::onListItem( MD::ListItem< MD::QStringTrait > * l, bool first )
+{
+	QTextCharFormat format;
+	format.setForeground( d->colors.listColor );
+	format.setFont( d->font );
+
+	d->setFormat( format, l->startLine(), l->startColumn(),
+		l->endLine(), l->endColumn() );
+
+	MD::Visitor< MD::QStringTrait >::onListItem( l, first );
+}
+
+void
 SyntaxVisitor::onTable( MD::Table< MD::QStringTrait > * t )
 {
+	QTextCharFormat format;
+	format.setForeground( d->colors.tableColor );
+
+	d->setFormat( format, t->startLine(), t->startColumn(),
+		t->endLine(), t->endColumn() );
+
 	if( !t->isEmpty() )
 	{
 		int columns = 0;
@@ -248,6 +308,11 @@ SyntaxVisitor::onAnchor( MD::Anchor< MD::QStringTrait > * a )
 void
 SyntaxVisitor::onRawHtml( MD::RawHtml< MD::QStringTrait > * h )
 {
+	QTextCharFormat format;
+	format.setForeground( d->colors.htmlColor );
+
+	d->setFormat( format, h->startLine(), h->startColumn(),
+		h->endLine(), h->endColumn() );
 }
 
 void
@@ -260,7 +325,7 @@ SyntaxVisitor::onLink( MD::Link< MD::QStringTrait > * l )
 {
 	QTextCharFormat format;
 	format.setForeground( d->colors.linkColor );
-	format.setFont( d->font );
+	format.setFont( d->styleFont( l->opts() ) );
 
 	d->setFormat( format, l->startLine(), l->startColumn(),
 		l->endLine(), l->endColumn() );
@@ -272,16 +337,48 @@ SyntaxVisitor::onLink( MD::Link< MD::QStringTrait > * l )
 void
 SyntaxVisitor::onImage( MD::Image< MD::QStringTrait > * i )
 {
+	QTextCharFormat format;
+	format.setForeground( d->colors.linkColor );
+
+	d->setFormat( format, i->startLine(), i->startColumn(),
+		i->endLine(), i->endColumn() );
+
+	if( i->p() )
+		onParagraph( i->p().get(), true );
 }
 
 void
 SyntaxVisitor::onFootnoteRef( MD::FootnoteRef< MD::QStringTrait > * ref )
 {
+	if( d->doc->footnotesMap().find( ref->id() ) != d->doc->footnotesMap().cend() )
+	{
+		QTextCharFormat format;
+		format.setForeground( d->colors.linkColor );
+		format.setFont( d->styleFont( ref->opts() ) );
+
+		d->setFormat( format, ref->startLine(), ref->startColumn(),
+			ref->endLine(), ref->endColumn() );
+	}
+	else
+	{
+		QTextCharFormat format;
+		format.setForeground( d->colors.textColor );
+		format.setFont( d->styleFont( ref->opts() ) );
+
+		d->setFormat( format, ref->startLine(), ref->startColumn(),
+			ref->endLine(), ref->endColumn() );
+	}
 }
 
 void
 SyntaxVisitor::onFootnote( MD::Footnote< MD::QStringTrait > * f )
 {
+	QTextCharFormat format;
+	format.setForeground( d->colors.footnoteColor );
+
+	d->setFormat( format, f->startLine(), f->startColumn(),
+		f->endLine(), f->endColumn() );
+
 	MD::Visitor< MD::QStringTrait >::onFootnote( f );
 }
 

@@ -31,6 +31,8 @@
 
 namespace MdEditor {
 
+class ColorWidget;
+
 //
 // Colors
 //
@@ -41,6 +43,13 @@ struct Colors {
 	QColor linkColor = QColor( 0, 128, 0 );
 	QColor listColor = QColor( 0, 128, 0 );
 	QColor inlineColor = Qt::black;
+	QColor htmlColor = QColor( 128, 0, 0 );
+	QColor tableColor = Qt::black;
+	QColor blockquoteColor = QColor( 0, 0, 128 );
+	QColor codeColor = Qt::black;
+	QColor headingColor = QColor( 0, 0, 128 );
+	QColor mathColor = QColor( 128, 0, 0 );
+	QColor footnoteColor = QColor( 128, 0, 0 );
 	bool enabled = true;
 }; // struct Colors
 
@@ -73,7 +82,17 @@ private slots:
 	void chooseListColor();
 	void chooseTextColor();
 	void chooseInlineColor();
+	void chooseHtmlColor();
+	void chooseTableColor();
+	void chooseBlockquoteColor();
+	void chooseCodeColor();
+	void chooseHeadingColor();
+	void chooseMathColor();
+	void chooseFootnoteColor();
 	void colorsToggled( bool on );
+
+private:
+	void chooseColor( ColorWidget * w, QColor & c );
 
 private:
 	Q_DISABLE_COPY( ColorsDialog )

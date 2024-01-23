@@ -37,7 +37,11 @@ bool operator != ( const Colors & c1, const Colors & c2 )
 {
 	return ( c1.enabled != c2.enabled || c1.inlineColor != c2.inlineColor ||
 		c1.linkColor != c2.linkColor || c1.listColor != c2.listColor ||
-		c1.textColor != c2.textColor );
+		c1.textColor != c2.textColor || c1.htmlColor != c2.htmlColor ||
+		c1.tableColor != c2.tableColor || c1.blockquoteColor != c2.blockquoteColor ||
+		c1.codeColor != c2.codeColor || c1.enabled != c2.enabled ||
+		c1.headingColor != c2.headingColor || c1.mathColor != c2.mathColor ||
+		c1.footnoteColor != c2.footnoteColor );
 }
 
 //
@@ -73,6 +77,16 @@ ColorsDialog::ColorsDialog( const Colors & cols, QWidget * parent )
 		this, &ColorsDialog::chooseTextColor );
 	connect( d->ui.inlineColor, &ColorWidget::clicked,
 		this, &ColorsDialog::chooseInlineColor );
+	connect( d->ui.htmlColor, &ColorWidget::clicked,
+		this, &ColorsDialog::chooseHtmlColor );
+	connect( d->ui.tableColor, &ColorWidget::clicked,
+		this, &ColorsDialog::chooseTableColor );
+	connect( d->ui.blockquoteColor, &ColorWidget::clicked,
+		this, &ColorsDialog::chooseBlockquoteColor );
+	connect( d->ui.codeColor, &ColorWidget::clicked,
+		this, &ColorsDialog::chooseCodeColor );
+	connect( d->ui.headingColor, &ColorWidget::clicked,
+		this, &ColorsDialog::chooseHeadingColor );
 	connect( d->ui.colors, &QGroupBox::toggled,
 		this, &ColorsDialog::colorsToggled );
 }
@@ -112,54 +126,91 @@ ColorsDialog::applyColors()
 	d->ui.linkColor->setColor( d->colors.linkColor );
 	d->ui.listColor->setColor( d->colors.listColor );
 	d->ui.textColor->setColor( d->colors.textColor );
+	d->ui.htmlColor->setColor( d->colors.htmlColor );
+	d->ui.tableColor->setColor( d->colors.tableColor );
+	d->ui.blockquoteColor->setColor( d->colors.blockquoteColor );
+	d->ui.codeColor->setColor( d->colors.codeColor );
+	d->ui.headingColor->setColor( d->colors.headingColor );
+	d->ui.mathColor->setColor( d->colors.mathColor );
+	d->ui.footnoteColor->setColor( d->colors.footnoteColor );
+}
+
+void
+ColorsDialog::chooseColor( ColorWidget * w, QColor & c )
+{
+	QColorDialog dlg( c, this );
+
+	if( dlg.exec() == QDialog::Accepted )
+	{
+		w->setColor( dlg.currentColor() );
+		c = dlg.currentColor();
+	}
 }
 
 void
 ColorsDialog::chooseLinkColor()
 {
-	QColorDialog dlg( d->ui.linkColor->color(), this );
-
-	if( dlg.exec() == QDialog::Accepted )
-	{
-		d->ui.linkColor->setColor( dlg.currentColor() );
-		d->colors.linkColor = dlg.currentColor();
-	}
+	chooseColor( d->ui.linkColor, d->colors.linkColor );
 }
 
 void
 ColorsDialog::chooseListColor()
 {
-	QColorDialog dlg( d->ui.listColor->color(), this );
-
-	if( dlg.exec() == QDialog::Accepted )
-	{
-		d->ui.listColor->setColor( dlg.currentColor() );
-		d->colors.listColor = dlg.currentColor();
-	}
+	chooseColor( d->ui.listColor, d->colors.listColor );
 }
 
 void
 ColorsDialog::chooseTextColor()
 {
-	QColorDialog dlg( d->ui.textColor->color(), this );
-
-	if( dlg.exec() == QDialog::Accepted )
-	{
-		d->ui.textColor->setColor( dlg.currentColor() );
-		d->colors.textColor = dlg.currentColor();
-	}
+	chooseColor( d->ui.textColor, d->colors.textColor );
 }
 
 void
 ColorsDialog::chooseInlineColor()
 {
-	QColorDialog dlg( d->ui.inlineColor->color(), this );
+	chooseColor( d->ui.inlineColor, d->colors.inlineColor );
+}
 
-	if( dlg.exec() == QDialog::Accepted )
-	{
-		d->ui.inlineColor->setColor( dlg.currentColor() );
-		d->colors.inlineColor = dlg.currentColor();
-	}
+void
+ColorsDialog::chooseHtmlColor()
+{
+	chooseColor( d->ui.htmlColor, d->colors.htmlColor );
+}
+
+void
+ColorsDialog::chooseTableColor()
+{
+	chooseColor( d->ui.tableColor, d->colors.tableColor );
+}
+
+void
+ColorsDialog::chooseBlockquoteColor()
+{
+	chooseColor( d->ui.blockquoteColor, d->colors.blockquoteColor );
+}
+
+void
+ColorsDialog::chooseCodeColor()
+{
+	chooseColor( d->ui.codeColor, d->colors.codeColor );
+}
+
+void
+ColorsDialog::chooseHeadingColor()
+{
+	chooseColor( d->ui.headingColor, d->colors.headingColor );
+}
+
+void
+ColorsDialog::chooseMathColor()
+{
+	chooseColor( d->ui.mathColor, d->colors.mathColor );
+}
+
+void
+ColorsDialog::chooseFootnoteColor()
+{
+	chooseColor( d->ui.footnoteColor, d->colors.footnoteColor );
 }
 
 void

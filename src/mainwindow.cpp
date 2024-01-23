@@ -893,6 +893,13 @@ MainWindow::saveCfg() const
 			cfg.set_listColor( d->mdColors.listColor.name( QColor::HexRgb ) );
 			cfg.set_textColor( d->mdColors.textColor.name( QColor::HexRgb ) );
 			cfg.set_inlineColor( d->mdColors.inlineColor.name( QColor::HexRgb ) );
+			cfg.set_htmlColor( d->mdColors.htmlColor.name( QColor::HexRgb ) );
+			cfg.set_tableColor( d->mdColors.tableColor.name( QColor::HexRgb ) );
+			cfg.set_blockquoteColor( d->mdColors.blockquoteColor.name( QColor::HexRgb ) );
+			cfg.set_codeColor( d->mdColors.codeColor.name( QColor::HexRgb ) );
+			cfg.set_headingColor( d->mdColors.headingColor.name( QColor::HexRgb ) );
+			cfg.set_mathColor( d->mdColors.mathColor.name( QColor::HexRgb ) );
+			cfg.set_footnoteColor( d->mdColors.footnoteColor.name( QColor::HexRgb ) );
 
 			tag_Cfg< cfgfile::qstring_trait_t > tag( cfg );
 
@@ -945,6 +952,27 @@ MainWindow::readCfg()
 
 			if( !cfg.inlineColor().isEmpty() )
 				d->mdColors.inlineColor = QColor( cfg.inlineColor() );
+
+			if( !cfg.htmlColor().isEmpty() )
+				d->mdColors.htmlColor = QColor( cfg.htmlColor() );
+
+			if( !cfg.tableColor().isEmpty() )
+				d->mdColors.tableColor = QColor( cfg.tableColor() );
+
+			if( !cfg.blockquoteColor().isEmpty() )
+				d->mdColors.blockquoteColor = QColor( cfg.blockquoteColor() );
+
+			if( !cfg.codeColor().isEmpty() )
+				d->mdColors.codeColor = QColor( cfg.codeColor() );
+
+			if( !cfg.headingColor().isEmpty() )
+				d->mdColors.headingColor = QColor( cfg.headingColor() );
+
+			if( !cfg.mathColor().isEmpty() )
+				d->mdColors.mathColor = QColor( cfg.mathColor() );
+
+			if( !cfg.footnoteColor().isEmpty() )
+				d->mdColors.footnoteColor = QColor( cfg.footnoteColor() );
 
 			d->mdColors.enabled = cfg.useColors();
 		}
