@@ -58,6 +58,34 @@ struct SyntaxVisitorPrivate {
 			f.block.layout()->setFormats( f.format );
 	}
 
+	long long int blockquoteOffset( const QString & s ) const
+	{
+		auto findBlockquote = [] ( const QString & s, long long int p ) -> long long int
+		{
+			while( p < s.length() && s[ p ].isSpace() )
+				++p;
+
+			if( p < s.length() && s[ p ] == QLatin1Char( '>' ) )
+				return p;
+
+			return -1;
+		};
+
+		long long int pos = 0, delta = 0, stack = blockquoteStackSize;
+
+		while( ( pos = findBlockquote( s, pos ) ) != -1 )
+		{
+			--stack;
+			++pos;
+			delta = pos;
+
+			if( !stack )
+				break;
+		}
+
+		return delta;
+	}
+
 	void setFormat( const QTextCharFormat & format,
 		long long int startLine, long long int startColumn,
 		long long int endLine, long long int endColumn )
@@ -66,13 +94,18 @@ struct SyntaxVisitorPrivate {
 		{
 			formats[ i ].block = editor->document()->findBlockByNumber( i );
 
+			long long int delta = 0;
+
+			if( blockquoteStackSize )
+				delta = blockquoteOffset( formats[ i ].block.text() );
+
 			QTextLayout::FormatRange r;
 			r.format = format;
-			r.start = ( i == startLine ? startColumn : 0 );
+			r.start = ( i == startLine ? startColumn : delta );
 			r.length = ( i == startLine ?
 				( i == endLine ? endColumn - startColumn + 1 :
 					formats[ i ].block.length() - startColumn ) :
-				( i == endLine ? endColumn + 1 : formats[ i ].block.length() ) );
+				( i == endLine ? endColumn + 1 - delta : formats[ i ].block.length() - delta ) );
 
 			formats[ i ].format.push_back( r );
 		}
@@ -110,6 +143,8 @@ struct SyntaxVisitorPrivate {
 	QMap< int, Format > formats;
 	//! Default font.
 	QFont font;
+	//! Blockquote stack counter.
+	int blockquoteStackSize = 0;
 }; // struct SyntaxVisitorPrivate
 
 
@@ -231,6 +266,12 @@ SyntaxVisitor::onBlockquote( MD::Blockquote< MD::QStringTrait > * b )
 
 	d->setFormat( format, b->startLine(), b->startColumn(),
 		b->endLine(), b->endColumn() );
+
+	++d->blockquoteStackSize;
+
+	MD::Visitor< MD::QStringTrait >::onBlockquote( b );
+
+	--d->blockquoteStackSize;
 }
 
 void
