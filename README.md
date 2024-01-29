@@ -17,6 +17,59 @@ executable. Sources of `md-pdf-gui` you can get [here](https://github.com/igormi
 
 Thanks.
 
+# Hiring
+
+I need a co-worker to develop a small JavaScript library to style blockquotes in HTML preview,
+like on GitHub if they have `[!NOTE]`, `[!TIP]`, `[!IMPORTANT]`, `[!WARNING]`, `[!CAUTION]`.
+
+In HTML I have, for example:
+
+```html
+<blockquote><p> [!IMPORTANT] 
+ text </p></blockquote>
+```
+
+And I need to replace such blockquotes with:
+
+```html
+<blockquote class="markdown-alert markdown-alert-important"><p> [!IMPORTANT]
+ text </p></blockquote>
+```
+
+and `[!IMPORTANT]` should be replaced with something to be equal to GitHub's one.
+
+
+CSS for alerts:
+
+```css
+.markdown-body .markdown-alert {
+  padding: 0 1em;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid var(--color-border-default);
+}
+
+.markdown-body .markdown-alert>:first-child {
+  margin-top: 0;
+}
+
+.markdown-body .markdown-alert>:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-body .markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-accent-fg);
+}
+
+.markdown-body .markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-done-fg);
+}
+
+.markdown-body .markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-attention-fg);
+}
+```
+
 # Installers
 
 You can make `x64` installers for `Linux` and `Windows` by cloning [this](https://github.com/igormironchik/markdown) repository and running `deploy` workflow.
