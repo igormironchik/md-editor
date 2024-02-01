@@ -1,0 +1,18 @@
+{
+  "name": "badge-highlight",
+  "version": "1.0.0",
+  "description": "tool to replace html badges placeholders with styles elements",
+  "main": "index.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.mjs"
+  },
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": "20.11.0"
+  },
+  "dependencies": {
+    "jsdom": "^24.0.0"
+  }
+}
