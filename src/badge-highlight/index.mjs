@@ -9,7 +9,7 @@ const FILES_DIR = `${__dirname}/files/`;
 const FILE_PATH = `${__dirname}/files/input.html`;
 const ERROR_MESSAGE = "FS operation failed";
 
-const regexPattern = /\[\!(IMPORTANT|WARNING|NOTE|TIP|CAUTION)\]/g;
+const tags = ['[!NOTE]', '[!TIP]', '[!IMPORTANT]', '[!WARNING]', '[!CAUTION]'];
 
 
 async function replaceBadges () {
@@ -23,7 +23,7 @@ async function replaceBadges () {
     for(const blockquote of blockquotes) {
         const { innerHTML } = blockquote;
 
-        if (regexPattern.test(innerHTML)) {
+        if (tags.some(t => innerHTML.includes(t))) {
             blockquote.classList.add('markdown-alert', 'markdown-alert-important');
         }
     }
