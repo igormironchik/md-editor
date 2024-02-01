@@ -42,7 +42,7 @@ async function replaceBadges() {
 
     let outputFile;
     try {
-        outputFile = await open(`${FILES_DIR}/output.html`, "r+");
+        outputFile = await open(`${FILES_DIR}/output.html`, "w+");
         outputFile.write(dom.serialize());
     } catch (e) {
         if (e.code === "EEXIST") {
