@@ -25,8 +25,6 @@
         <file>res/img/qt.png</file>
         <file>res/img/view-preview.png</file>
         <file>res/css/github-markdown.css</file>
-        <file>res/highlight.min.js</file>
-        <file>res/css/default.min.css</file>
         <file>res/katex/contrib/auto-render.min.js</file>
         <file>res/katex/fonts/KaTeX_AMS-Regular.ttf</file>
         <file>res/katex/fonts/KaTeX_AMS-Regular.woff</file>
@@ -93,5 +91,7 @@
         <file>res/katex/README.md</file>
         <file>res/img/bookmarks-organize.png</file>
         <file>res/img/go-jump.png</file>
+        <file>res/css/github.css</file>
+        <file>res/highlight.js</file>
     </qresource>
 </RCC>
