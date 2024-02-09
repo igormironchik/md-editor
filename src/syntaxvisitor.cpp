@@ -380,58 +380,51 @@ copyParagraphAndApplyOpts( std::shared_ptr< MD::Paragraph< MD::QStringTrait > > 
 
 	for( const auto & i : p->items() )
 	{
-		auto * iwo = dynamic_cast< MD::ItemWithOpts< MD::QStringTrait > * > ( i.get() );
-
-		if( iwo )
+		switch( i->type() )
 		{
-			switch( iwo->type() )
+			case MD::ItemType::Text :
 			{
-				case MD::ItemType::Text :
-				{
-					auto from = static_cast< MD::Text< MD::QStringTrait > * > ( i.get() );
-					auto t = std::make_shared< MD::Text< MD::QStringTrait > > ();
-					copyPositions( i.get(), t.get() );
-					t->setText( from->text() );
-					t->setSpaceBefore( from->isSpaceBefore() );
-					t->setSpaceAfter( from->isSpaceAfter() );
-					t->setOpts( opts | from->opts() );
-					tmp->appendItem( t );
-				}
-					break;
-
-				case MD::ItemType::Link :
-				{
-					auto from = static_cast< MD::Link< MD::QStringTrait > * > ( i.get() );
-					auto l = std::make_shared< MD::Link< MD::QStringTrait > > ();
-					copyPositions( i.get(), l.get() );
-					l->setText( from->text() );
-					l->setImg( from->img() );
-					l->setUrl( from->url() );
-					l->setOpts( opts | from->opts() );
-					l->setP( copyParagraphAndApplyOpts( from->p(), opts ) );
-					tmp->appendItem( l );
-				}
-					break;
-
-				case MD::ItemType::Code :
-				{
-					auto from = static_cast< MD::Code< MD::QStringTrait > * > ( i.get() );
-					auto c = std::make_shared< MD::Code< MD::QStringTrait > > (
-						from->text(), false, from->isInlined() );
-					copyPositions( i.get(), c.get() );
-					c->setSyntax( from->syntax() );
-					c->setOpts( opts | from->opts() );
-					tmp->appendItem( c );
-				}
-					break;
-
-				defaut :
-					tmp->appendItem( i );
-					break;
+				auto from = static_cast< MD::Text< MD::QStringTrait > * > ( i.get() );
+				auto t = std::make_shared< MD::Text< MD::QStringTrait > > ();
+				copyPositions( i.get(), t.get() );
+				t->setText( from->text() );
+				t->setSpaceBefore( from->isSpaceBefore() );
+				t->setSpaceAfter( from->isSpaceAfter() );
+				t->setOpts( opts | from->opts() );
+				tmp->appendItem( t );
 			}
+				break;
+
+			case MD::ItemType::Link :
+			{
+				auto from = static_cast< MD::Link< MD::QStringTrait > * > ( i.get() );
+				auto l = std::make_shared< MD::Link< MD::QStringTrait > > ();
+				copyPositions( i.get(), l.get() );
+				l->setText( from->text() );
+				l->setImg( from->img() );
+				l->setUrl( from->url() );
+				l->setOpts( opts | from->opts() );
+				l->setP( copyParagraphAndApplyOpts( from->p(), opts ) );
+				tmp->appendItem( l );
+			}
+				break;
+
+			case MD::ItemType::Code :
+			{
+				auto from = static_cast< MD::Code< MD::QStringTrait > * > ( i.get() );
+				auto c = std::make_shared< MD::Code< MD::QStringTrait > > (
+					from->text(), false, from->isInlined() );
+				copyPositions( i.get(), c.get() );
+				c->setSyntax( from->syntax() );
+				c->setOpts( opts | from->opts() );
+				tmp->appendItem( c );
+			}
+				break;
+
+			defaut :
+				tmp->appendItem( i );
+				break;
 		}
-		else
-			tmp->appendItem( i );
 	}
 
 	return tmp;
