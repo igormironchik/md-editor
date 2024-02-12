@@ -690,7 +690,7 @@ MainWindow::onAbout()
 			"Version %1\n\n"
 			"md4qt version %2\n\n"
 			"Author - Igor Mironchik (igor.mironchik at gmail dot com).\n\n"
-			"Copyright (c) 2023 Igor Mironchik.\n\n"
+			"Copyright (c) 2023-2024 Igor Mironchik.\n\n"
 			"Licensed under GNU GPL 3.0." )
 				.arg( c_version )
 				.arg( c_md4qtVersion ) );
