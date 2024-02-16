@@ -1,6 +1,7 @@
 export const html = `<!DOCTYPE html>
 <section>
-    <blockquote><p> [!IMPORTANT] text </p></blockquote>
+    <blockquote><p> [!IMPORTANT] 
+    text </p></blockquote>
 </section>
 <section>
     <blockquote><p> [!NOTE] text </p></blockquote>
