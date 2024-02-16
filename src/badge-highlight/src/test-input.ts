@@ -1,12 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-    <link type="text/css" href="../../res/css/default.min.css"/>
-    <link type="text/css" href="../../res/css/github-markdown.css"/>
-</head>
-<body>
+export const html = `<!DOCTYPE html>
 <section>
     <blockquote><p> [!IMPORTANT] text </p></blockquote>
 </section>
@@ -22,5 +14,4 @@
 <section>
     <blockquote><p> [!CAUTION] text </p></blockquote>
 </section>
-</body>
-</html>
+`;
