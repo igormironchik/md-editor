@@ -1,5 +1,5 @@
 import { replaceBadges } from './hightlight';
-import { html } from './test-input';
+import { html } from '../test-utils/test-input';
 
 describe('highlight util', () => {
   beforeEach(() => {
