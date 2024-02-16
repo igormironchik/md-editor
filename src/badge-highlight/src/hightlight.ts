@@ -29,15 +29,31 @@ function createImageParagraph(tag: string): DocumentFragment {
   return documentFragment;
 }
 
+function getTags(pInnerHTML: string): string[] {
+  return Object.keys(tagClassNameMap).filter(t => pInnerHTML.includes(t));
+}
+
 export function replaceBadges(document: HTMLElement) {
   const blockquotes = Array.from(document.querySelectorAll('blockquote'));
 
   for (const blockquote of blockquotes) {
-    const { innerHTML } = blockquote;
+    const pInnerHTML = blockquote.querySelector('p')?.innerHTML;
 
-    const tag = Object.keys(tagClassNameMap).find((t) => innerHTML.includes(t));
+    if(!pInnerHTML) {
+      continue;
+    }
 
-    if (tag) {
+    const tags = getTags(pInnerHTML);
+
+    if (tags.length > 1) {
+      const [firstLine] = pInnerHTML.split('\n');
+      if (firstLine && getTags(firstLine).length > 1) {
+        continue;
+      }
+    }
+
+    if (tags.length) {
+      const tag = tags[0] ?? '';
       blockquote.innerHTML = blockquote.innerHTML.replace(tag, '');
       blockquote.prepend(createImageParagraph(tag));
       blockquote.classList.add('markdown-alert', getTagClassname(tag));

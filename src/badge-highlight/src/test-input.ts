@@ -15,4 +15,11 @@ export const html = `<!DOCTYPE html>
 <section>
     <blockquote><p> [!CAUTION] text </p></blockquote>
 </section>
+<section>
+    <blockquote class="modified"><p> [!NOTE]
+     [!TIP] </p></blockquote>
+</section>
+<section>
+    <blockquote class="not-modified"><p> [!TIP] [!NOTE] </p></blockquote>
+</section>
 `;

@@ -24,4 +24,24 @@ describe('highlight util', () => {
 
     expect(img?.src).toBe('qrc:/res/important.svg');
   });
+
+  xtest('should proceed only top level nodes', () => {});
+
+  test(`tag should be modified only if it has marker in first <p> tag on first line`, () => {
+    const selector = '.modified';
+    replaceBadges(document.body);
+    const element = document.body.querySelector(selector);
+    const p = element?.querySelector('p');
+
+    expect(p?.querySelector('img')).toBeTruthy();
+  });
+
+  test(`tag should be ignored only if it has marker in first <p> tag on first line`, () => {
+    const selector = '.not-modified';
+    replaceBadges(document.body);
+    const element = document.body.querySelector(selector);
+    const p = element?.querySelector('p');
+
+    expect(p?.querySelector('img')).not.toBeTruthy();
+  });
 });
