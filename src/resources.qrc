@@ -107,5 +107,6 @@
         <file>res/katex/contrib/render-a11y-string.js</file>
         <file>res/katex/contrib/render-a11y-string.min.js</file>
         <file>res/katex/contrib/render-a11y-string.mjs</file>
+        <file>res/hightlight-blockquote.js</file>
     </qresource>
 </RCC>
