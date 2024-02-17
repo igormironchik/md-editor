@@ -361,6 +361,77 @@ SyntaxVisitor::onHorizontalLine( MD::HorizontalLine< MD::QStringTrait > * l )
 {
 }
 
+namespace /* anonymous */ {
+void
+copyPositions( MD::Item< MD::QStringTrait > * from,
+	MD::Item< MD::QStringTrait > * to )
+{
+	to->setStartColumn( from->startColumn() );
+	to->setStartLine( from->startLine() );
+	to->setEndColumn( from->endColumn() );
+	to->setEndLine( from->endLine() );
+}
+
+std::shared_ptr< MD::Paragraph< MD::QStringTrait > >
+copyParagraphAndApplyOpts( std::shared_ptr< MD::Paragraph< MD::QStringTrait > > p, int opts )
+{
+	auto tmp = std::make_shared< MD::Paragraph< MD::QStringTrait > > ();
+	copyPositions( p.get(), tmp.get() );
+
+	for( const auto & i : p->items() )
+	{
+		switch( i->type() )
+		{
+			case MD::ItemType::Text :
+			{
+				auto from = static_cast< MD::Text< MD::QStringTrait > * > ( i.get() );
+				auto t = std::make_shared< MD::Text< MD::QStringTrait > > ();
+				copyPositions( i.get(), t.get() );
+				t->setText( from->text() );
+				t->setSpaceBefore( from->isSpaceBefore() );
+				t->setSpaceAfter( from->isSpaceAfter() );
+				t->setOpts( opts | from->opts() );
+				tmp->appendItem( t );
+			}
+				break;
+
+			case MD::ItemType::Link :
+			{
+				auto from = static_cast< MD::Link< MD::QStringTrait > * > ( i.get() );
+				auto l = std::make_shared< MD::Link< MD::QStringTrait > > ();
+				copyPositions( i.get(), l.get() );
+				l->setText( from->text() );
+				l->setImg( from->img() );
+				l->setUrl( from->url() );
+				l->setOpts( opts | from->opts() );
+				l->setP( copyParagraphAndApplyOpts( from->p(), opts ) );
+				tmp->appendItem( l );
+			}
+				break;
+
+			case MD::ItemType::Code :
+			{
+				auto from = static_cast< MD::Code< MD::QStringTrait > * > ( i.get() );
+				auto c = std::make_shared< MD::Code< MD::QStringTrait > > (
+					from->text(), false, from->isInlined() );
+				copyPositions( i.get(), c.get() );
+				c->setSyntax( from->syntax() );
+				c->setOpts( opts | from->opts() );
+				tmp->appendItem( c );
+			}
+				break;
+
+			defaut :
+				tmp->appendItem( i );
+				break;
+		}
+	}
+
+	return tmp;
+}
+
+} /* namespace anonymous */
+
 void
 SyntaxVisitor::onLink( MD::Link< MD::QStringTrait > * l )
 {
@@ -372,7 +443,10 @@ SyntaxVisitor::onLink( MD::Link< MD::QStringTrait > * l )
 		l->endLine(), l->endColumn() );
 
 	if( l->p() )
-		onParagraph( l->p().get(), true );
+	{
+		const auto p = copyParagraphAndApplyOpts( l->p(), l->opts() );
+		onParagraph( p.get(), true );
+	}
 }
 
 void

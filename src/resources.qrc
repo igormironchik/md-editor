@@ -25,9 +25,6 @@
         <file>res/img/qt.png</file>
         <file>res/img/view-preview.png</file>
         <file>res/css/github-markdown.css</file>
-        <file>res/highlight.min.js</file>
-        <file>res/css/default.min.css</file>
-        <file>res/katex/contrib/auto-render.min.js</file>
         <file>res/katex/fonts/KaTeX_AMS-Regular.ttf</file>
         <file>res/katex/fonts/KaTeX_AMS-Regular.woff</file>
         <file>res/katex/fonts/KaTeX_AMS-Regular.woff2</file>
@@ -93,5 +90,22 @@
         <file>res/katex/README.md</file>
         <file>res/img/bookmarks-organize.png</file>
         <file>res/img/go-jump.png</file>
+        <file>res/css/github.css</file>
+        <file>res/highlight.js</file>
+        <file>res/katex/contrib/auto-render.js</file>
+        <file>res/katex/contrib/auto-render.min.js</file>
+        <file>res/katex/contrib/auto-render.mjs</file>
+        <file>res/katex/contrib/copy-tex.js</file>
+        <file>res/katex/contrib/copy-tex.min.js</file>
+        <file>res/katex/contrib/copy-tex.mjs</file>
+        <file>res/katex/contrib/mathtex-script-type.js</file>
+        <file>res/katex/contrib/mathtex-script-type.min.js</file>
+        <file>res/katex/contrib/mathtex-script-type.mjs</file>
+        <file>res/katex/contrib/mhchem.js</file>
+        <file>res/katex/contrib/mhchem.min.js</file>
+        <file>res/katex/contrib/mhchem.mjs</file>
+        <file>res/katex/contrib/render-a11y-string.js</file>
+        <file>res/katex/contrib/render-a11y-string.min.js</file>
+        <file>res/katex/contrib/render-a11y-string.mjs</file>
     </qresource>
 </RCC>
