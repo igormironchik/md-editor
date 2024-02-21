@@ -107,5 +107,7 @@
         <file>res/katex/contrib/render-a11y-string.js</file>
         <file>res/katex/contrib/render-a11y-string.min.js</file>
         <file>res/katex/contrib/render-a11y-string.mjs</file>
+        <file>res/css/emoji.css</file>
+        <file>res/emoji.js</file>
     </qresource>
 </RCC>
