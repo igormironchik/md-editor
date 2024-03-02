@@ -19,9 +19,10 @@ Thanks.
 
 # Installers
 
-You can make `x64` installers for `Linux` and `Windows` by cloning [this](https://github.com/igormironchik/markdown) repository and running `deploy` workflow. Or use latest `deploy`
-workflow to download ready artifacts. Note, that `deploy_mac` is not tested ever, it's just an
-experiment.
+You can make `x64` installers for `Linux` and `Windows` by cloning [this](https://github.com/igormironchik/markdown) repository and running corresponding `deploy_*` workflow. Note, that
+`deploy_mac` is not tested ever, it's just an experiment. `Linux` deploy may work without 
+integration into desktop environment, for example, on `Plasma 6`. I suggest use your own build
+on `Linux` with new `Plasma 6`.
 
 # Building
 
