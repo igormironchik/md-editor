@@ -34,8 +34,22 @@ function getTags(pInnerHTML: string): string[] {
   return Object.keys(tagClassNameMap).filter(t => pInnerHTML.includes(t));
 }
 
+function isTopLevel(elem: Element): boolean {
+  const maxDepth = 5; // blockquote -> article -> body -> html -> document -> null
+  let parentNode = elem.parentNode;
+  let depth = 1;
+
+  while (parentNode) {
+    parentNode = parentNode.parentNode;
+    depth++;
+  }
+
+  return depth < maxDepth;
+}
+
 export function replaceBadges(document: HTMLElement) {
-  const blockquotes = Array.from(document.querySelectorAll('blockquote'));
+  const selector = 'article>blockquote,section>blockquote';
+  const blockquotes = Array.from(document.querySelectorAll(selector)).filter(isTopLevel);
 
   for (const blockquote of blockquotes) {
     const pInnerHTML = blockquote.querySelector('p')?.innerHTML;

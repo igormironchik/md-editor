@@ -22,4 +22,9 @@ export const html = `<!DOCTYPE html>
 <section>
     <blockquote class="not-modified"><p> [!TIP] [!NOTE] </p></blockquote>
 </section>
+<section>
+    <p>
+        <blockquote class="not-modified-nested"><p> [!TIP] </p></blockquote>
+    </p>
+</section>
 `;

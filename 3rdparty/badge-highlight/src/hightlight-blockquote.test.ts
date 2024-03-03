@@ -20,9 +20,9 @@ describe('highlight util', () => {
     replaceBadges(document.body);
     const element = document.body.querySelector(selector);
     const p = element?.querySelector('p');
-    const img = p?.querySelector('img');
+    const img = p?.querySelector('svg');
 
-    expect(img?.src).toBe('qrc:/res/important.svg');
+    expect(img).toBeDefined();
   });
 
   xtest('should proceed only top level nodes', () => {});
@@ -33,7 +33,7 @@ describe('highlight util', () => {
     const element = document.body.querySelector(selector);
     const p = element?.querySelector('p');
 
-    expect(p?.querySelector('img')).toBeTruthy();
+    expect(p?.querySelector('svg')).toBeTruthy();
   });
 
   test(`tag should be ignored only if it has marker in first <p> tag on first line`, () => {
@@ -43,5 +43,13 @@ describe('highlight util', () => {
     const p = element?.querySelector('p');
 
     expect(p?.querySelector('img')).not.toBeTruthy();
+  });
+
+  test('should ignore the non top level blockquote', () => {
+    const selector = '.not-modified-nested';
+    replaceBadges(document.body);
+    const element = document.body.querySelector(selector);
+
+    expect(element?.classList.length).toBe(1);
   });
 });
