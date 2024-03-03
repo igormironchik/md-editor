@@ -34,7 +34,7 @@ function getTags(pInnerHTML: string): string[] {
   return Object.keys(tagClassNameMap).filter(t => pInnerHTML.includes(t));
 }
 
-function replaceBadges(document: HTMLElement) {
+export function replaceBadges(document: HTMLElement) {
   const blockquotes = Array.from(document.querySelectorAll('blockquote'));
 
   for (const blockquote of blockquotes) {

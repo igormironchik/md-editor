@@ -1,4 +1,4 @@
-import { replaceBadges } from './hightlight';
+import { replaceBadges } from './hightlight-blockquote';
 import { html } from '../test-utils/test-input';
 
 describe('highlight util', () => {
