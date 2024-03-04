@@ -909,11 +909,31 @@ MainWindow::onChooseFont()
 }
 
 static const QString c_appCfgFileName = QStringLiteral( "md-editor.cfg" );
+static const QString c_appCfgFolderName = QStringLiteral( "Markdown" );
+
+QString
+MainWindow::configFileName( bool inPlace ) const
+{
+	const auto folders = QStandardPaths::standardLocations( QStandardPaths::ConfigLocation );
+	
+	if( !folders.isEmpty() && !inPlace )
+		return folders.front() + QDir::separator() + c_appCfgFolderName + QDir::separator() +
+			c_appCfgFileName;
+	else
+		return QApplication::applicationDirPath() + QDir::separator() + c_appCfgFileName;
+}
 
 void
 MainWindow::saveCfg() const
 {
-	QFile file( QApplication::applicationDirPath() + QDir::separator() + c_appCfgFileName );
+	auto fileName = configFileName( false );
+	
+	const QDir dir( "./" );
+	
+	if( !dir.mkpath( QFileInfo( fileName ).absolutePath() ) )
+		fileName = configFileName( true );
+	
+	QFile file( fileName );
 
 	if( file.open( QIODevice::WriteOnly ) )
 	{
@@ -954,7 +974,12 @@ MainWindow::saveCfg() const
 void
 MainWindow::readCfg()
 {
-	QFile file( QApplication::applicationDirPath() + QDir::separator() + c_appCfgFileName );
+	auto fileName = configFileName( false );
+	
+	if( !QFileInfo::exists( fileName ) )
+		fileName = configFileName( true );
+	
+	QFile file( fileName );
 
 	if( file.open( QIODevice::ReadOnly ) )
 	{
