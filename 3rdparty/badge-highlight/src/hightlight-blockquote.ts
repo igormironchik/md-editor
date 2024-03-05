@@ -38,7 +38,7 @@ export function replaceBadges(document: HTMLElement) {
   Array.from(document.children).forEach(e => {
     Array.from(e.children).forEach(e => {
       if(e instanceof HTMLQuoteElement) {
-        let p = e.firstChild;
+        const p = e.firstChild;
 
         if(p instanceof HTMLParagraphElement) {
           const pInnerHTML = p.innerHTML;
