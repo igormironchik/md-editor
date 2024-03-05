@@ -32,22 +32,25 @@ export function replaceBadges(document) {
     Array.from(document.children).forEach(e => {
         Array.from(e.children).forEach(e => {
             if (e instanceof HTMLQuoteElement) {
-                const pInnerHTML = e.querySelector('p')?.innerHTML;
-                if (!pInnerHTML) {
-                    return;
-                }
-                const tags = getTags(pInnerHTML);
-                if (tags.length > 1) {
-                    const [firstLine] = pInnerHTML.split('\n');
-                    if (firstLine && getTags(firstLine).length > 1) {
+                let p = e.firstChild;
+                if (p instanceof HTMLParagraphElement) {
+                    const pInnerHTML = p.innerHTML;
+                    if (!pInnerHTML) {
                         return;
                     }
-                }
-                if (tags.length) {
-                    const tag = tags[0] ?? '';
-                    e.innerHTML = e.innerHTML.replace(tag, '');
-                    e.prepend(createImageParagraph(tag));
-                    e.classList.add('markdown-alert', getTagClassname(tag));
+                    const tags = getTags(pInnerHTML);
+                    if (tags.length > 1) {
+                        const [firstLine] = pInnerHTML.split('\n');
+                        if (firstLine && getTags(firstLine).length > 1) {
+                            return;
+                        }
+                    }
+                    if (tags.length) {
+                        const tag = tags[0] ?? '';
+                        e.innerHTML = e.innerHTML.replace(tag, '');
+                        e.prepend(createImageParagraph(tag));
+                        e.classList.add('markdown-alert', getTagClassname(tag));
+                    }
                 }
             }
         });

@@ -19,5 +19,7 @@ export const html = `<!DOCTYPE html>
     <ul>
         <li><blockquote class="not-modified-nested"><p> [!TIP] </p></blockquote></li>
     </ul>
+
+    <blockquote class="not-modified-p-is-not-first"><ul><li>text</li></ul><p> [!TIP] </p></blockquote>
 </article>
 `;

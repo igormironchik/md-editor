@@ -42,7 +42,16 @@ describe('highlight util', () => {
     const element = document.body.querySelector(selector);
     const p = element?.querySelector('p');
 
-    expect(p?.querySelector('img')).not.toBeTruthy();
+    expect(p?.querySelector('svg')).not.toBeTruthy();
+  });
+
+  test(`<p> is not first child of <blockquote>, so should be ignored`, () => {
+    const selector = '.not-modified-p-is-not-first';
+    replaceBadges(document.body);
+    const element = document.body.querySelector(selector);
+    const p = element?.querySelector('p');
+
+    expect(p?.querySelector('svg')).not.toBeTruthy();
   });
 
   test('should ignore the non top level blockquote', () => {
