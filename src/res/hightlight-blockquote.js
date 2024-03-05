@@ -1,4 +1,3 @@
-"use strict";
 const tagClassNameMap = {
     '[!NOTE]': 'markdown-alert-note',
     '[!TIP]': 'markdown-alert-tip',
@@ -29,26 +28,29 @@ function createImageParagraph(tag) {
 function getTags(pInnerHTML) {
     return Object.keys(tagClassNameMap).filter(t => pInnerHTML.includes(t));
 }
-function replaceBadges(document) {
-    const blockquotes = Array.from(document.querySelectorAll('blockquote'));
-    for (const blockquote of blockquotes) {
-        const pInnerHTML = blockquote.querySelector('p')?.innerHTML;
-        if (!pInnerHTML) {
-            continue;
-        }
-        const tags = getTags(pInnerHTML);
-        if (tags.length > 1) {
-            const [firstLine] = pInnerHTML.split('\n');
-            if (firstLine && getTags(firstLine).length > 1) {
-                continue;
+export function replaceBadges(document) {
+    Array.from(document.children).forEach(e => {
+        Array.from(e.children).forEach(e => {
+            if (e instanceof HTMLQuoteElement) {
+                const pInnerHTML = e.querySelector('p')?.innerHTML;
+                if (!pInnerHTML) {
+                    return;
+                }
+                const tags = getTags(pInnerHTML);
+                if (tags.length > 1) {
+                    const [firstLine] = pInnerHTML.split('\n');
+                    if (firstLine && getTags(firstLine).length > 1) {
+                        return;
+                    }
+                }
+                if (tags.length) {
+                    const tag = tags[0] ?? '';
+                    e.innerHTML = e.innerHTML.replace(tag, '');
+                    e.prepend(createImageParagraph(tag));
+                    e.classList.add('markdown-alert', getTagClassname(tag));
+                }
             }
-        }
-        if (tags.length) {
-            const tag = tags[0] ?? '';
-            blockquote.innerHTML = blockquote.innerHTML.replace(tag, '');
-            blockquote.prepend(createImageParagraph(tag));
-            blockquote.classList.add('markdown-alert', getTagClassname(tag));
-        }
-    }
+        });
+    });
 }
 //# sourceMappingURL=hightlight-blockquote.js.map
