@@ -34,44 +34,32 @@ function getTags(pInnerHTML: string): string[] {
   return Object.keys(tagClassNameMap).filter(t => pInnerHTML.includes(t));
 }
 
-function isTopLevel(elem: Element): boolean {
-  const maxDepth = 5; // blockquote -> article -> body -> html -> document -> null
-  let parentNode = elem.parentNode;
-  let depth = 1;
-
-  while (parentNode) {
-    parentNode = parentNode.parentNode;
-    depth++;
-  }
-
-  return depth < maxDepth;
-}
-
 export function replaceBadges(document: HTMLElement) {
-  const selector = 'article>blockquote,section>blockquote';
-  const blockquotes = Array.from(document.querySelectorAll(selector)).filter(isTopLevel);
+  Array.from(document.children).forEach(e => {
+    Array.from(e.children).forEach(e => {
+      if(e instanceof HTMLQuoteElement) {
+        const pInnerHTML = e.querySelector('p')?.innerHTML;
 
-  for (const blockquote of blockquotes) {
-    const pInnerHTML = blockquote.querySelector('p')?.innerHTML;
+        if(!pInnerHTML) {
+          return;
+        }
 
-    if(!pInnerHTML) {
-      continue;
-    }
+        const tags = getTags(pInnerHTML);
 
-    const tags = getTags(pInnerHTML);
+        if (tags.length > 1) {
+          const [firstLine] = pInnerHTML.split('\n');
+          if (firstLine && getTags(firstLine).length > 1) {
+            return;
+          }
+        }
 
-    if (tags.length > 1) {
-      const [firstLine] = pInnerHTML.split('\n');
-      if (firstLine && getTags(firstLine).length > 1) {
-        continue;
+        if (tags.length) {
+          const tag = tags[0] ?? '';
+          e.innerHTML = e.innerHTML.replace(tag, '');
+          e.prepend(createImageParagraph(tag));
+          e.classList.add('markdown-alert', getTagClassname(tag));
+        }
       }
-    }
-
-    if (tags.length) {
-      const tag = tags[0] ?? '';
-      blockquote.innerHTML = blockquote.innerHTML.replace(tag, '');
-      blockquote.prepend(createImageParagraph(tag));
-      blockquote.classList.add('markdown-alert', getTagClassname(tag));
-    }
-  }
+    })
+  });
 }
