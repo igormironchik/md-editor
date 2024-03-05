@@ -93,6 +93,7 @@ private:
 	void updateWindowTitle();
 	void updateLoadAllLinkedFilesMenuText();
 	void closeAllLinkedFiles();
+	QString configFileName( bool inPlace ) const;
 
 private:
 	Q_DISABLE_COPY( MainWindow )

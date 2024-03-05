@@ -421,7 +421,7 @@ copyParagraphAndApplyOpts( std::shared_ptr< MD::Paragraph< MD::QStringTrait > > 
 			}
 				break;
 
-			defaut :
+			default :
 				tmp->appendItem( i );
 				break;
 		}
