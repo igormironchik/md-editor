@@ -10,3 +10,4 @@
 /**/*.moc
 /**/ui_*.h
 /**/qrc_*.cpp
+/src/badge-highlight/node_modules/
