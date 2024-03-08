@@ -1,3 +1,7 @@
+> [!WARNING]
+> This repository is archived and no more supported. Development moved to
+> https://github.com/igormironchik/markdown-tools
+
 This is a `Markdown` editor for Qt 6.
 
 Almost ready for use, there some minor issues with `QWebEngineView` in Qt 6.4.3,
